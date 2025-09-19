@@ -328,7 +328,7 @@
             storageBucket: "confyn-47447.firebasestorage.app",
             messagingSenderId: "292650745185",
             appId: "1:292650745185:web:2e1555246eb1b14c115920"
-           };
+        };
         // ====================================================================================
 
         const app = initializeApp(firebaseConfig);
@@ -354,19 +354,17 @@
         let allTurmas = [];
         let filteredTurmas = [];
         let allCompanies = [];
+        let allCursos = [];
         let tempAlunosList = [];
         let currentPage = 1;
         const itemsPerPage = 5;
-
-        const cursosDisponiveis = [
-            "NR-35 - Trabalho em Altura", "NR-33 - Espaços Confinados", "NR-10 - Básico",
-            "Brigada de Incêndio - Nível Básico", "Brigada de Incêndio - Nível Intermediário",
-            "Primeiros Socorros", "Socorrista", "APH - Atendimento Pré-Hospitalar"
-        ];
         
         // --- INITIAL DATA LOADING ---
         async function loadInitialData() {
-            await fetchCompanies();
+            await Promise.all([
+                fetchCompanies(),
+                fetchCursos()
+            ]);
             await fetchTurmas();
             populateCursosFilter();
             populateEmpresasFilter();
@@ -374,10 +372,20 @@
 
         async function fetchCompanies() {
             try {
-                const querySnapshot = await getDocs(collection(db, "empresas"));
+                const querySnapshot = await getDocs(query(collection(db, "empresas"), orderBy("nome")));
                 allCompanies = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             } catch (error) {
                 console.error("Erro ao buscar empresas: ", error);
+            }
+        }
+
+        async function fetchCursos() {
+            try {
+                const q = query(collection(db, "cursos"), orderBy("nome"));
+                const querySnapshot = await getDocs(q);
+                allCursos = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            } catch (error) {
+                console.error("Erro ao buscar cursos: ", error);
             }
         }
 
@@ -387,7 +395,6 @@
                 const querySnapshot = await getDocs(q);
                 allTurmas = querySnapshot.docs.map(doc => {
                     const data = doc.data();
-                    // Converte Timestamp do Firebase para Date do JS
                     const jsDate = data.data ? data.data.toDate() : null;
                     return { id: doc.id, ...data, data: jsDate };
                 });
@@ -467,16 +474,16 @@
         // --- FILTERS & DISPLAY ---
         function applyFiltersAndSearch() {
             const status = document.getElementById('status-filter').value;
-            const startDate = document.getElementById('start-date-filter').value;
-            const endDate = document.getElementById('end-date-filter').value;
+            const startDateValue = document.getElementById('start-date-filter').value;
+            const endDateValue = document.getElementById('end-date-filter').value;
             const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            
+            const startDate = startDateValue ? new Date(startDateValue + 'T00:00:00') : null;
+            const endDate = endDateValue ? new Date(endDateValue + 'T23:59:59') : null;
             
             filteredTurmas = allTurmas.filter(turma => {
                 const statusMatch = status === 'Todos' || turma.status === status;
-                
-                const dateMatch = (!startDate || turma.data >= new Date(startDate)) && 
-                                  (!endDate || turma.data <= new Date(endDate));
-
+                const dateMatch = (!startDate || turma.data >= startDate) && (!endDate || turma.data <= endDate);
                 const searchMatch = !searchTerm ||
                     turma.cursoNome.toLowerCase().includes(searchTerm) ||
                     turma.empresaNome.toLowerCase().includes(searchTerm) ||
@@ -530,7 +537,10 @@
         // --- EVENT LISTENERS & POPULATORS ---
         document.getElementById('apply-filters-button').addEventListener('click', applyFiltersAndSearch);
         document.getElementById('clear-filters-button').addEventListener('click', () => {
-             document.querySelector('form').reset();
+             document.getElementById('status-filter').value = 'Todos';
+             document.getElementById('start-date-filter').value = '';
+             document.getElementById('end-date-filter').value = '';
+             document.getElementById('search-input').value = '';
              applyFiltersAndSearch();
         });
         document.getElementById('search-input').addEventListener('input', applyFiltersAndSearch);
@@ -538,7 +548,7 @@
         function populateCursosFilter() {
             const select = document.getElementById('curso-nome');
             select.innerHTML = '<option value="">Selecione um curso</option>';
-            cursosDisponiveis.forEach(curso => select.innerHTML += `<option value="${curso}">${curso}</option>`);
+            allCursos.forEach(curso => select.innerHTML += `<option value="${curso.nome}">${curso.nome}</option>`);
         }
         
         function populateEmpresasFilter() {
@@ -552,12 +562,18 @@
             e.preventDefault();
             const turmaId = document.getElementById('turma-id').value;
             const empresaSelect = document.getElementById('empresa-select');
+            const turmaDateValue = document.getElementById('turma-data').value;
+
+            if (!turmaDateValue) {
+                alert("Por favor, selecione uma data para o treinamento.");
+                return;
+            }
             
             const turmaData = {
                 cursoNome: document.getElementById('curso-nome').value,
                 empresaId: empresaSelect.value,
                 empresaNome: empresaSelect.options[empresaSelect.selectedIndex].text,
-                data: Timestamp.fromDate(new Date(document.getElementById('turma-data').value)),
+                data: Timestamp.fromDate(new Date(turmaDateValue + 'T00:00:00')),
                 status: document.getElementById('turma-status').value,
                 alunos: tempAlunosList
             };
@@ -593,22 +609,29 @@
                 bairro: document.getElementById('aluno-bairro').value,
                 cidade: document.getElementById('aluno-cidade').value,
                 uf: document.getElementById('aluno-uf').value,
-                documentoUrl: null
             };
 
             if (file) {
                 uploadStatus.textContent = 'Enviando documento...';
                 const storageRef = ref(storage, `documentos_alunos/${Date.now()}_${file.name}`);
-                await uploadBytes(storageRef, file);
-                alunoData.documentoUrl = await getDownloadURL(storageRef);
+                const uploadTask = await uploadBytes(storageRef, file);
+                const downloadURL = await getDownloadURL(uploadTask.ref);
+                alunoData.documentoUrl = downloadURL;
                 uploadStatus.textContent = 'Documento enviado!';
             }
 
             if (alunoId) { // Editing existing student in the list
                 const index = tempAlunosList.findIndex(a => (a.tempId || a.id) === alunoId);
-                if (index > -1) tempAlunosList[index] = { ...tempAlunosList[index], ...alunoData };
+                if (index > -1) {
+                    // Preserve existing doc URL if no new file is uploaded
+                    if(!alunoData.documentoUrl) {
+                        alunoData.documentoUrl = tempAlunosList[index].documentoUrl || null;
+                    }
+                    tempAlunosList[index] = { ...tempAlunosList[index], ...alunoData };
+                }
             } else { // Adding new student
                 alunoData.tempId = `temp_${Date.now()}`;
+                alunoData.documentoUrl = alunoData.documentoUrl || null;
                 tempAlunosList.push(alunoData);
             }
 
@@ -703,7 +726,7 @@
         };
         document.getElementById('aluno-telefone').addEventListener('input', formatarTelefone);
 
-        // --- PAGINATION CONTROLS ---
+        // --- PAGINATION CONTROLS & REPORT ---
         function updatePaginationControls() {
             const totalPages = Math.ceil(filteredTurmas.length / itemsPerPage);
             const info = document.getElementById('pagination-info');
@@ -735,6 +758,40 @@
                 currentPage++;
                 displayTurmas();
             }
+        });
+        
+        document.getElementById('download-report-button').addEventListener('click', () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(20);
+            doc.setTextColor('#2c3e50');
+            doc.text("Relatório de Turmas - CONFYN", 14, 22);
+            
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            doc.text(`Filtros Aplicados: Status (${document.getElementById('status-filter').value})`, 14, 30);
+            const date = new Date().toLocaleDateString('pt-BR');
+            doc.text(`Gerado em: ${date}`, 14, 35);
+
+            const tableData = filteredTurmas.map(t => [
+                t.cursoNome,
+                t.empresaNome,
+                t.data ? t.data.toLocaleDateString('pt-BR') : 'N/A',
+                t.alunos ? t.alunos.length : 0,
+                t.status
+            ]);
+
+            doc.autoTable({
+                startY: 45,
+                head: [['Curso', 'Empresa', 'Data', 'Nº Alunos', 'Status']],
+                body: tableData,
+                theme: 'grid',
+                headStyles: { fillColor: '#f97316' },
+            });
+
+            doc.save('Relatorio_Turmas_CONFYN.pdf');
         });
 
     </script>
