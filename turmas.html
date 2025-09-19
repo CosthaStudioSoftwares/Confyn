@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CONFYN - Módulo Alunos/Turmas</title>
+    <title>CONFYN - Módulo de Alunos/Turmas</title>
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -52,6 +52,10 @@
 
             <!-- Menu -->
             <nav class="flex-1 px-4 py-6 space-y-2">
+                <a href="dashboard.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
+                    <ion-icon name="grid-outline" class="text-xl"></ion-icon>
+                    <span class="ml-4">Dashboard</span>
+                </a>
                 <a href="empresas.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
                     <ion-icon name="business-outline" class="text-xl"></ion-icon>
                     <span class="ml-4">Empresas</span>
@@ -93,7 +97,7 @@
             <header class="h-20 bg-white border-b flex items-center justify-between px-8">
                 <div>
                     <h1 class="text-xl font-bold text-gray-800">Alunos/Turmas</h1>
-                    <p class="text-sm text-gray-500">Dashboard / Alunos/Turmas</p>
+                    <p class="text-sm text-gray-500">Dashboard / Alunos e Turmas</p>
                 </div>
                 <div class="flex items-center gap-6">
                     <div class="relative">
@@ -113,11 +117,11 @@
 
             <!-- Área de Conteúdo -->
             <main class="flex-1 p-8 overflow-y-auto">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-semibold text-gray-700">Listagem de Turmas</h2>
+                 <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-semibold text-gray-700">Agenda de Treinamentos</h2>
                     <button class="flex items-center gap-2 bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 transition-colors">
                         <ion-icon name="add-outline" class="text-xl"></ion-icon>
-                        <span>Adicionar Turma</span>
+                        <span>Agendar Nova Turma</span>
                     </button>
                 </div>
 
@@ -128,19 +132,15 @@
                         <select id="status-filter" class="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
                             <option>Todos</option>
                             <option>Agendada</option>
-                            <option>Em Andamento</option>
                             <option>Concluída</option>
                             <option>Cancelada</option>
                         </select>
                     </div>
-                     <div class="flex items-center gap-2">
-                        <label for="curso-filter" class="text-sm font-medium text-gray-700">Curso:</label>
-                        <select id="curso-filter" class="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
-                            <option>Todos</option>
-                            <option>Brigada de Incêndio</option>
-                            <option>Primeiros Socorros</option>
-                            <option>NR-35 Trabalho em Altura</option>
-                        </select>
+                    <div class="flex items-center gap-2">
+                        <label for="date-filter" class="text-sm font-medium text-gray-700">Período:</label>
+                        <input type="date" id="date-start" class="border rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        <span class="text-gray-500">até</span>
+                        <input type="date" id="date-end" class="border rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
                     </div>
                     <button class="bg-slate-800 text-white font-semibold py-1.5 px-4 rounded-lg hover:bg-slate-700 transition-colors text-sm">Aplicar</button>
                     <button class="text-gray-600 hover:text-gray-800 font-medium text-sm">Limpar</button>
@@ -151,10 +151,10 @@
                     <table class="w-full text-sm text-left text-gray-600">
                         <thead class="bg-gray-50 text-xs text-gray-700 uppercase tracking-wider">
                             <tr>
-                                <th class="p-4">Nome do Curso</th>
-                                <th class="p-4">Empresa Cliente</th>
+                                <th class="p-4">Curso</th>
+                                <th class="p-4">Empresa</th>
                                 <th class="p-4">Data</th>
-                                <th class="p-4">Instrutor</th>
+                                <th class="p-4">Nº de Alunos</th>
                                 <th class="p-4">Status</th>
                                 <th class="p-4">Ações</th>
                             </tr>
@@ -163,65 +163,38 @@
                             <tr class="border-b hover:bg-gray-50">
                                 <td class="p-4 font-medium text-gray-900">Brigada de Incêndio - Nível I</td>
                                 <td class="p-4">Acme Corporation</td>
-                                <td class="p-4">25/10/2025</td>
-                                <td class="p-4">Carlos Pereira</td>
-                                <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Concluída</span></td>
-                                <td class="p-4 flex gap-4 text-gray-500">
-                                    <ion-icon name="eye-outline" class="text-lg cursor-pointer hover:text-orange-600"></ion-icon>
-                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600"></ion-icon>
-                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600"></ion-icon>
-                                </td>
-                            </tr>
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">NR-35 Trabalho em Altura</td>
-                                <td class="p-4">Soluções XYZ Ltda</td>
-                                <td class="p-4">15/11/2025</td>
-                                <td class="p-4">Mariana Costa</td>
+                                <td class="p-4">20/09/2025</td>
+                                <td class="p-4 text-center">15</td>
                                 <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Agendada</span></td>
                                 <td class="p-4 flex gap-4 text-gray-500">
-                                    <ion-icon name="eye-outline" class="text-lg cursor-pointer hover:text-orange-600"></ion-icon>
-                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600"></ion-icon>
-                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600"></ion-icon>
+                                    <ion-icon name="eye-outline" class="text-lg cursor-pointer hover:text-orange-600" title="Ver Detalhes"></ion-icon>
+                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600" title="Editar"></ion-icon>
+                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600" title="Cancelar"></ion-icon>
                                 </td>
                             </tr>
                             <tr class="border-b hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">Primeiros Socorros Básico</td>
-                                <td class="p-4">Tech Inovações</td>
-                                <td class="p-4">02/12/2025</td>
-                                <td class="p-4">Carlos Pereira</td>
-                                <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">Em Andamento</span></td>
+                                <td class="p-4 font-medium text-gray-900">NR-35 - Trabalho em Altura</td>
+                                <td class="p-4">Soluções XYZ Ltda</td>
+                                <td class="p-4">15/08/2025</td>
+                                <td class="p-4 text-center">8</td>
+                                <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Concluída</span></td>
                                 <td class="p-4 flex gap-4 text-gray-500">
-                                    <ion-icon name="eye-outline" class="text-lg cursor-pointer hover:text-orange-600"></ion-icon>
-                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600"></ion-icon>
-                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600"></ion-icon>
+                                    <ion-icon name="eye-outline" class="text-lg cursor-pointer hover:text-orange-600" title="Ver Detalhes"></ion-icon>
+                                    <ion-icon name="document-text-outline" class="text-lg cursor-pointer hover:text-green-600" title="Emitir Certificados"></ion-icon>
                                 </td>
                             </tr>
-                            <tr class="hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">Brigada de Incêndio - Nível II</td>
-                                <td class="p-4">Mercado Central</td>
-                                <td class="p-4">20/09/2025</td>
-                                <td class="p-4">Mariana Costa</td>
+                             <tr class="border-b hover:bg-gray-50">
+                                <td class="p-4 font-medium text-gray-900">Primeiros Socorros</td>
+                                <td class="p-4">Tech Inovações</td>
+                                <td class="p-4">01/08/2025</td>
+                                <td class="p-4 text-center">12</td>
                                 <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Cancelada</span></td>
                                 <td class="p-4 flex gap-4 text-gray-500">
-                                    <ion-icon name="eye-outline" class="text-lg cursor-pointer hover:text-orange-600"></ion-icon>
-                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600"></ion-icon>
-                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600"></ion-icon>
+                                    <ion-icon name="eye-outline" class="text-lg cursor-pointer hover:text-orange-600" title="Ver Detalhes"></ion-icon>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
-                </div>
-
-                <!-- Paginação -->
-                <div class="flex justify-between items-center mt-6 text-sm text-gray-600">
-                    <p>Mostrando 1-4 de 28 turmas</p>
-                    <div class="flex items-center gap-2">
-                        <button class="px-3 py-1 border rounded-lg hover:bg-gray-200">&lt; Anterior</button>
-                        <button class="px-3 py-1 border rounded-lg bg-orange-500 text-white">1</button>
-                        <button class="px-3 py-1 border rounded-lg hover:bg-gray-200">2</button>
-                        <button class="px-3 py-1 border rounded-lg hover:bg-gray-200">3</button>
-                        <button class="px-3 py-1 border rounded-lg hover:bg-gray-200">Próximo &gt;</button>
-                    </div>
                 </div>
             </main>
         </div>
