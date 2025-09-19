@@ -182,12 +182,12 @@
         // ====================================================================================
         // COLE AQUI A CONFIGURAÇÃO DO SEU FIREBASE
         const firebaseConfig = {
-            apiKey: "SUA_API_KEY",
-            authDomain: "SEU_AUTH_DOMAIN",
-            projectId: "SEU_PROJECT_ID",
-            storageBucket: "SEU_STORAGE_BUCKET",
-            messagingSenderId: "SEU_MESSAGING_SENDER_ID",
-            appId: "SEU_APP_ID"
+            apiKey: "AIzaSyDJEFwpP0GuuBugz4KFgzwdJTlhXS3H7w8",
+            authDomain: "confyn-47447.firebaseapp.com",
+            projectId: "confyn-47447",
+            storageBucket: "confyn-47447.firebasestorage.app",
+            messagingSenderId: "292650745185",
+            appId: "1:292650745185:web:2e1555246eb1b14c115920"
         };
         // ====================================================================================
 
@@ -198,14 +198,21 @@
         // --- AUTH & SECURITY ---
         onAuthStateChanged(auth, user => {
             if (user) {
+                // Usuário está logado, atualiza a UI
+                console.log("Usuário logado:", user.email);
                 const userName = user.email.split('@')[0];
                 document.getElementById('user-name').textContent = userName;
                 document.getElementById('user-initials').textContent = userName.substring(0, 2).toUpperCase();
             } else {
+                // Usuário não está logado, redireciona para a página de login
+                console.log("Nenhum usuário logado. Redirecionando...");
                 window.location.href = 'index.html';
             }
         });
-        document.getElementById('logout-button').addEventListener('click', () => signOut(auth));
+
+        document.getElementById('logout-button').addEventListener('click', () => {
+            signOut(auth).catch(error => console.error("Erro no logout:", error));
+        });
 
         // --- MODAL CURSOS ---
         const cursosModal = document.getElementById('cursos-modal');
