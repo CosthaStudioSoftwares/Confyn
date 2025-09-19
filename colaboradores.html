@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CONFYN - Módulo Colaboradores</title>
+    <title>CONFYN - Módulo de Colaboradores</title>
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -52,6 +52,10 @@
 
             <!-- Menu -->
             <nav class="flex-1 px-4 py-6 space-y-2">
+                <a href="dashboard.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
+                    <ion-icon name="grid-outline" class="text-xl"></ion-icon>
+                    <span class="ml-4">Dashboard</span>
+                </a>
                 <a href="empresas.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
                     <ion-icon name="business-outline" class="text-xl"></ion-icon>
                     <span class="ml-4">Empresas</span>
@@ -113,6 +117,22 @@
 
             <!-- Área de Conteúdo -->
             <main class="flex-1 p-8 overflow-y-auto">
+                <!-- Indicadores da Equipe -->
+                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <p class="text-sm text-gray-500">Total de Colaboradores</p>
+                        <p class="text-2xl font-bold text-gray-800">12</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <p class="text-sm text-gray-500">Instrutores Ativos</p>
+                        <p class="text-2xl font-bold text-green-600">8</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <p class="text-sm text-gray-500">Administrativo</p>
+                        <p class="text-2xl font-bold text-blue-600">4</p>
+                    </div>
+                </div>
+
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-semibold text-gray-700">Listagem de Colaboradores</h2>
                     <button class="flex items-center gap-2 bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 transition-colors">
@@ -124,20 +144,12 @@
                 <!-- Filtros -->
                 <div class="bg-white p-4 rounded-lg shadow-sm mb-6 flex items-center gap-4">
                     <div class="flex items-center gap-2">
-                        <label for="status-filter" class="text-sm font-medium text-gray-700">Status:</label>
-                        <select id="status-filter" class="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
-                            <option>Todos</option>
-                            <option>Ativo</option>
-                            <option>Inativo</option>
-                        </select>
-                    </div>
-                     <div class="flex items-center gap-2">
-                        <label for="cargo-filter" class="text-sm font-medium text-gray-700">Cargo:</label>
-                        <select id="cargo-filter" class="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
-                            <option>Todos</option>
-                            <option>Instrutor(a)</option>
+                        <label for="funcao-filter" class="text-sm font-medium text-gray-700">Função:</label>
+                        <select id="funcao-filter" class="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                            <option>Todas</option>
+                            <option>Instrutor</option>
                             <option>Administrativo</option>
-                            <option>Financeiro</option>
+                            <option>Brigadista</option>
                         </select>
                     </div>
                     <button class="bg-slate-800 text-white font-semibold py-1.5 px-4 rounded-lg hover:bg-slate-700 transition-colors text-sm">Aplicar</button>
@@ -150,8 +162,7 @@
                         <thead class="bg-gray-50 text-xs text-gray-700 uppercase tracking-wider">
                             <tr>
                                 <th class="p-4">Nome</th>
-                                <th class="p-4">Cargo</th>
-                                <th class="p-4">Telefone</th>
+                                <th class="p-4">Função</th>
                                 <th class="p-4">E-mail</th>
                                 <th class="p-4">Status</th>
                                 <th class="p-4">Ações</th>
@@ -159,65 +170,40 @@
                         </thead>
                         <tbody>
                             <tr class="border-b hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">Carlos Pereira</td>
-                                <td class="p-4">Instrutor(a)</td>
-                                <td class="p-4">(11) 98765-4321</td>
-                                <td class="p-4">carlos.p@email.com</td>
+                                <td class="p-4 font-medium text-gray-900">João da Silva</td>
+                                <td class="p-4">Instrutor</td>
+                                <td class="p-4">joao.silva@confyn.com</td>
                                 <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Ativo</span></td>
                                 <td class="p-4 flex gap-4 text-gray-500">
-                                    <ion-icon name="eye-outline" class="text-lg cursor-pointer hover:text-orange-600"></ion-icon>
-                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600"></ion-icon>
-                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600"></ion-icon>
+                                    <ion-icon name="calendar-outline" class="text-lg cursor-pointer hover:text-purple-600" title="Ver Escala"></ion-icon>
+                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600" title="Editar"></ion-icon>
+                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600" title="Excluir"></ion-icon>
                                 </td>
                             </tr>
                             <tr class="border-b hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">Mariana Costa</td>
-                                <td class="p-4">Instrutor(a)</td>
-                                <td class="p-4">(21) 91234-5678</td>
-                                <td class="p-4">mariana.c@email.com</td>
-                                <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Ativo</span></td>
-                                <td class="p-4 flex gap-4 text-gray-500">
-                                    <ion-icon name="eye-outline" class="text-lg cursor-pointer hover:text-orange-600"></ion-icon>
-                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600"></ion-icon>
-                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600"></ion-icon>
-                                </td>
-                            </tr>
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">Fernanda Lima</td>
+                                <td class="p-4 font-medium text-gray-900">Maria Oliveira</td>
                                 <td class="p-4">Administrativo</td>
-                                <td class="p-4">(31) 95555-4444</td>
-                                <td class="p-4">fernanda.l@email.com</td>
+                                <td class="p-4">maria.oliveira@confyn.com</td>
                                 <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Ativo</span></td>
                                 <td class="p-4 flex gap-4 text-gray-500">
-                                    <ion-icon name="eye-outline" class="text-lg cursor-pointer hover:text-orange-600"></ion-icon>
-                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600"></ion-icon>
-                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600"></ion-icon>
+                                    <ion-icon name="calendar-outline" class="text-lg cursor-pointer hover:text-purple-600" title="Ver Escala"></ion-icon>
+                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600" title="Editar"></ion-icon>
+                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600" title="Excluir"></ion-icon>
                                 </td>
                             </tr>
                             <tr class="hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">Ricardo Almeida</td>
-                                <td class="p-4">Financeiro</td>
-                                <td class="p-4">(71) 93333-2222</td>
-                                <td class="p-4">ricardo.a@email.com</td>
-                                <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-200 text-gray-800">Inativo</span></td>
+                                <td class="p-4 font-medium text-gray-900">Carlos Pereira</td>
+                                <td class="p-4">Instrutor</td>
+                                <td class="p-4">carlos.pereira@confyn.com</td>
+                                <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">Inativo</span></td>
                                 <td class="p-4 flex gap-4 text-gray-500">
-                                    <ion-icon name="eye-outline" class="text-lg cursor-pointer hover:text-orange-600"></ion-icon>
-                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600"></ion-icon>
-                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600"></ion-icon>
+                                    <ion-icon name="calendar-outline" class="text-lg cursor-pointer hover:text-purple-600" title="Ver Escala"></ion-icon>
+                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600" title="Editar"></ion-icon>
+                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600" title="Excluir"></ion-icon>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
-                </div>
-
-                <!-- Paginação -->
-                <div class="flex justify-between items-center mt-6 text-sm text-gray-600">
-                    <p>Mostrando 1-4 de 12 colaboradores</p>
-                    <div class="flex items-center gap-2">
-                        <button class="px-3 py-1 border rounded-lg hover:bg-gray-200">&lt; Anterior</button>
-                        <button class="px-3 py-1 border rounded-lg bg-orange-500 text-white">1</button>
-                        <button class="px-3 py-1 border rounded-lg hover:bg-gray-200">Próximo &gt;</button>
-                    </div>
                 </div>
             </main>
         </div>
