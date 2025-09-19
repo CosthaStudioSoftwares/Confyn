@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CONFYN - Módulo Estoque</title>
+    <title>CONFYN - Módulo de Estoque</title>
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -52,6 +52,10 @@
 
             <!-- Menu -->
             <nav class="flex-1 px-4 py-6 space-y-2">
+                <a href="dashboard.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
+                    <ion-icon name="grid-outline" class="text-xl"></ion-icon>
+                    <span class="ml-4">Dashboard</span>
+                </a>
                 <a href="empresas.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
                     <ion-icon name="business-outline" class="text-xl"></ion-icon>
                     <span class="ml-4">Empresas</span>
@@ -113,17 +117,52 @@
 
             <!-- Área de Conteúdo -->
             <main class="flex-1 p-8 overflow-y-auto">
+                <!-- Indicadores de Estoque -->
+                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <p class="text-sm text-gray-500">Total de Itens</p>
+                        <p class="text-2xl font-bold text-gray-800">128</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <p class="text-sm text-gray-500">Itens com Estoque Baixo</p>
+                        <p class="text-2xl font-bold text-red-600">5</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <p class="text-sm text-gray-500">Valor Total em Estoque</p>
+                        <p class="text-2xl font-bold text-green-600">R$ 15.780,00</p>
+                    </div>
+                </div>
+
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-semibold text-gray-700">Controle de Estoque</h2>
-                    <button class="flex items-center gap-2 bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 transition-colors">
-                        <ion-icon name="add-outline" class="text-xl"></ion-icon>
-                        <span>Adicionar Item</span>
-                    </button>
+                    <h2 class="text-2xl font-semibold text-gray-700">Inventário</h2>
+                     <div class="flex gap-4">
+                        <button class="flex items-center gap-2 bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-600 transition-colors">
+                            <ion-icon name="arrow-down-outline" class="text-xl"></ion-icon>
+                            <span>Registrar Entrada</span>
+                        </button>
+                        <button class="flex items-center gap-2 bg-yellow-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-yellow-600 transition-colors">
+                            <ion-icon name="arrow-up-outline" class="text-xl"></ion-icon>
+                            <span>Registrar Saída</span>
+                        </button>
+                        <button class="flex items-center gap-2 bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 transition-colors">
+                            <ion-icon name="add-outline" class="text-xl"></ion-icon>
+                            <span>Adicionar Novo Item</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Filtros -->
                 <div class="bg-white p-4 rounded-lg shadow-sm mb-6 flex items-center gap-4">
                     <div class="flex items-center gap-2">
+                        <label for="categoria-filter" class="text-sm font-medium text-gray-700">Categoria:</label>
+                        <select id="categoria-filter" class="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                            <option>Todas</option>
+                            <option>EPI</option>
+                            <option>Material de Treinamento</option>
+                            <option>Uniforme</option>
+                        </select>
+                    </div>
+                     <div class="flex items-center gap-2">
                         <label for="status-filter" class="text-sm font-medium text-gray-700">Status:</label>
                         <select id="status-filter" class="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
                             <option>Todos</option>
@@ -132,95 +171,59 @@
                             <option>Esgotado</option>
                         </select>
                     </div>
-                     <div class="flex items-center gap-2">
-                        <label for="categoria-filter" class="text-sm font-medium text-gray-700">Categoria:</label>
-                        <select id="categoria-filter" class="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
-                            <option>Todas</option>
-                            <option>Equipamento de Combate</option>
-                            <option>Primeiros Socorros</option>
-                            <option>Sinalização</option>
-                            <option>EPIs</option>
-                        </select>
-                    </div>
                     <button class="bg-slate-800 text-white font-semibold py-1.5 px-4 rounded-lg hover:bg-slate-700 transition-colors text-sm">Aplicar</button>
                     <button class="text-gray-600 hover:text-gray-800 font-medium text-sm">Limpar</button>
                 </div>
 
-                <!-- Tabela de Estoque -->
+                <!-- Tabela de Itens -->
                 <div class="bg-white rounded-lg shadow-sm overflow-hidden">
                     <table class="w-full text-sm text-left text-gray-600">
                         <thead class="bg-gray-50 text-xs text-gray-700 uppercase tracking-wider">
                             <tr>
                                 <th class="p-4">Item</th>
-                                <th class="p-4">Código/SKU</th>
                                 <th class="p-4">Categoria</th>
-                                <th class="p-4">Quantidade</th>
+                                <th class="p-4">Qtd. em Estoque</th>
+                                <th class="p-4">Estoque Mínimo</th>
                                 <th class="p-4">Status</th>
                                 <th class="p-4">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr class="border-b hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">Extintor de Incêndio ABC (4kg)</td>
-                                <td class="p-4">EXT-001</td>
-                                <td class="p-4">Equipamento de Combate</td>
-                                <td class="p-4 font-semibold">15</td>
+                                <td class="p-4 font-medium text-gray-900">Capacete de Segurança</td>
+                                <td class="p-4">EPI</td>
+                                <td class="p-4 font-semibold">25 un.</td>
+                                <td class="p-4">10 un.</td>
                                 <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Em Estoque</span></td>
                                 <td class="p-4 flex gap-4 text-gray-500">
-                                    <ion-icon name="eye-outline" class="text-lg cursor-pointer hover:text-orange-600"></ion-icon>
-                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600"></ion-icon>
-                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600"></ion-icon>
+                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600" title="Editar"></ion-icon>
+                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600" title="Excluir"></ion-icon>
                                 </td>
                             </tr>
                             <tr class="border-b hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">Kit Primeiros Socorros</td>
-                                <td class="p-4">KIT-001</td>
-                                <td class="p-4">Primeiros Socorros</td>
-                                <td class="p-4 font-semibold">5</td>
-                                <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">Estoque Baixo</span></td>
+                                <td class="p-4 font-medium text-gray-900">Luva de Raspa</td>
+                                <td class="p-4">EPI</td>
+                                <td class="p-4 font-semibold text-orange-600">8 pares</td>
+                                <td class="p-4">15 pares</td>
+                                <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800">Estoque Baixo</span></td>
                                 <td class="p-4 flex gap-4 text-gray-500">
-                                    <ion-icon name="eye-outline" class="text-lg cursor-pointer hover:text-orange-600"></ion-icon>
-                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600"></ion-icon>
-                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600"></ion-icon>
+                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600" title="Editar"></ion-icon>
+                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600" title="Excluir"></ion-icon>
                                 </td>
                             </tr>
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">Maca de Resgate Dobrável</td>
-                                <td class="p-4">MAC-001</td>
-                                <td class="p-4">Equipamento de Resgate</td>
-                                <td class="p-4 font-semibold">0</td>
+                            <tr class="hover:bg-gray-50">
+                                <td class="p-4 font-medium text-gray-900">Cone de Sinalização</td>
+                                <td class="p-4">Material de Treinamento</td>
+                                <td class="p-4 font-semibold text-red-600">0 un.</td>
+                                <td class="p-4">5 un.</td>
                                 <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Esgotado</span></td>
                                 <td class="p-4 flex gap-4 text-gray-500">
-                                    <ion-icon name="eye-outline" class="text-lg cursor-pointer hover:text-orange-600"></ion-icon>
-                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600"></ion-icon>
-                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600"></ion-icon>
-                                </td>
-                            </tr>
-                             <tr class="hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">Cone de Sinalização (75cm)</td>
-                                <td class="p-4">CON-001</td>
-                                <td class="p-4">Sinalização</td>
-                                <td class="p-4 font-semibold">25</td>
-                                <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Em Estoque</span></td>
-                                <td class="p-4 flex gap-4 text-gray-500">
-                                    <ion-icon name="eye-outline" class="text-lg cursor-pointer hover:text-orange-600"></ion-icon>
-                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600"></ion-icon>
-                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600"></ion-icon>
+                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600" title="Editar"></ion-icon>
+                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600" title="Excluir"></ion-icon>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
-                </div>
-
-                <!-- Paginação -->
-                <div class="flex justify-between items-center mt-6 text-sm text-gray-600">
-                    <p>Mostrando 1-4 de 32 itens</p>
-                    <div class="flex items-center gap-2">
-                        <button class="px-3 py-1 border rounded-lg hover:bg-gray-200">&lt; Anterior</button>
-                        <button class="px-3 py-1 border rounded-lg bg-orange-500 text-white">1</button>
-                        <button class="px-3 py-1 border rounded-lg hover:bg-gray-200">2</button>
-                        <button class="px-3 py-1 border rounded-lg hover:bg-gray-200">Próximo &gt;</button>
-                    </div>
                 </div>
             </main>
         </div>
