@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CONFYN - Dashboard</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Ionicons CDN -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    
+    <!-- Chart.js CDN for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div class="flex h-screen bg-gray-100">
+        <!-- Barra de Navegação Lateral -->
+        <aside class="w-64 flex-shrink-0 bg-slate-900 text-gray-300 flex flex-col transition-all duration-300">
+            <!-- Logo -->
+            <div class="h-20 flex items-center justify-center px-4 border-b border-slate-800">
+                 <div class="flex items-center gap-3">
+                    <ion-icon name="shield-checkmark-outline" class="text-3xl text-orange-500"></ion-icon>
+                    <span class="text-white text-2xl font-bold">CONFYN</span>
+                </div>
+            </div>
+
+            <!-- Menu -->
+            <nav class="flex-1 px-4 py-6 space-y-2">
+                <a href="dashboard.html" class="flex items-center px-4 py-2.5 rounded-lg bg-orange-600 text-white font-semibold shadow-md">
+                    <ion-icon name="grid-outline" class="text-xl"></ion-icon>
+                    <span class="ml-4">Dashboard</span>
+                </a>
+                <a href="empresas.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
+                    <ion-icon name="business-outline" class="text-xl"></ion-icon>
+                    <span class="ml-4">Empresas</span>
+                </a>
+                <a href="turmas.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
+                    <ion-icon name="people-outline" class="text-xl"></ion-icon>
+                    <span class="ml-4">Alunos/Turmas</span>
+                </a>
+                <a href="financeiro.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
+                    <ion-icon name="cash-outline" class="text-xl"></ion-icon>
+                    <span class="ml-4">Financeiro</span>
+                </a>
+                <a href="colaboradores.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
+                    <ion-icon name="id-card-outline" class="text-xl"></ion-icon>
+                    <span class="ml-4">Colaboradores</span>
+                </a>
+                <a href="estoque.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
+                    <ion-icon name="cube-outline" class="text-xl"></ion-icon>
+                    <span class="ml-4">Estoque</span>
+                </a>
+                <a href="administrativo.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
+                    <ion-icon name="settings-outline" class="text-xl"></ion-icon>
+                    <span class="ml-4">Administrativo</span>
+                </a>
+            </nav>
+
+            <!-- Rodapé da Sidebar -->
+            <div class="p-4 border-t border-slate-800">
+                <a href="#" class="flex items-center text-sm">
+                    <ion-icon name="chevron-back-outline" class="text-xl"></ion-icon>
+                    <span class="ml-2">Recolher Menu</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <div class="flex-1 flex flex-col">
+            <!-- Cabeçalho Superior -->
+            <header class="h-20 bg-white border-b flex items-center justify-between px-8">
+                <div>
+                    <h1 class="text-xl font-bold text-gray-800">Dashboard</h1>
+                    <p class="text-sm text-gray-500">Visão Geral do Sistema</p>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div class="relative">
+                        <ion-icon name="search-outline" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></ion-icon>
+                        <input type="text" placeholder="Busca rápida..." class="pl-10 pr-4 py-2 w-64 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    </div>
+                    <ion-icon name="notifications-outline" class="text-2xl text-gray-600 cursor-pointer"></ion-icon>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-slate-300 flex items-center justify-center font-bold text-slate-600">UN</div>
+                        <div>
+                            <p class="font-semibold text-sm">Usuário Admin</p>
+                            <a href="index.html" class="text-xs text-orange-600 hover:underline">Sair</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Área de Conteúdo -->
+            <main class="flex-1 p-8 overflow-y-auto">
+                <!-- KPIs -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-lg shadow-sm flex items-center gap-4">
+                        <div class="bg-blue-100 p-3 rounded-full">
+                            <ion-icon name="calendar-outline" class="text-2xl text-blue-500"></ion-icon>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Próximas Turmas (Mês)</p>
+                            <p class="text-2xl font-bold text-gray-800">8</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm flex items-center gap-4">
+                        <div class="bg-green-100 p-3 rounded-full">
+                            <ion-icon name="cash-outline" class="text-2xl text-green-500"></ion-icon>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Contas a Receber</p>
+                            <p class="text-2xl font-bold text-gray-800">R$ 12.540</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm flex items-center gap-4">
+                        <div class="bg-yellow-100 p-3 rounded-full">
+                            <ion-icon name="people-outline" class="text-2xl text-yellow-500"></ion-icon>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Novos Alunos (Mês)</p>
+                            <p class="text-2xl font-bold text-gray-800">45</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm flex items-center gap-4">
+                        <div class="bg-red-100 p-3 rounded-full">
+                            <ion-icon name="alert-circle-outline" class="text-2xl text-red-500"></ion-icon>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Certificados a Vencer</p>
+                            <p class="text-2xl font-bold text-gray-800">12</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráficos -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                    <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm">
+                        <h3 class="font-semibold text-gray-700 mb-4">Faturamento (Últimos 6 meses)</h3>
+                        <canvas id="faturamentoChart"></canvas>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                         <h3 class="font-semibold text-gray-700 mb-4">Treinamentos por Tipo</h3>
+                         <canvas id="treinamentosChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Tabelas de Acesso Rápido -->
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 class="font-semibold text-gray-700 mb-4">Agenda da Semana</h3>
+                    <table class="w-full text-sm text-left text-gray-600">
+                        <thead class="bg-gray-50 text-xs text-gray-700 uppercase tracking-wider">
+                            <tr>
+                                <th class="p-3">Data</th>
+                                <th class="p-3">Curso</th>
+                                <th class="p-3">Empresa</th>
+                                <th class="p-3">Instrutor</th>
+                                <th class="p-3">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="p-3 font-medium text-gray-900">20/09/2025</td>
+                                <td class="p-3">Brigada de Incêndio - Nível I</td>
+                                <td class="p-3">Acme Corporation</td>
+                                <td class="p-3">Carlos Silva</td>
+                                <td class="p-3"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Confirmado</span></td>
+                            </tr>
+                             <tr class="border-b hover:bg-gray-50">
+                                <td class="p-3 font-medium text-gray-900">22/09/2025</td>
+                                <td class="p-3">NR-35 - Trabalho em Altura</td>
+                                <td class="p-3">Soluções XYZ Ltda</td>
+                                <td class="p-3">Ana Pereira</td>
+                                <td class="p-3"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Confirmado</span></td>
+                            </tr>
+                             <tr class="hover:bg-gray-50">
+                                <td class="p-3 font-medium text-gray-900">23/09/2025</td>
+                                <td class="p-3">Primeiros Socorros</td>
+                                <td class="p-3">Mercado Central</td>
+                                <td class="p-3">Carlos Silva</td>
+                                <td class="p-3"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">Pendente</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+<script>
+    // Gráfico de Faturamento
+    const faturamentoCtx = document.getElementById('faturamentoChart').getContext('2d');
+    new Chart(faturamentoCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set'],
+            datasets: [{
+                label: 'Faturamento',
+                data: [12500, 19200, 14300, 17800, 22500, 18900],
+                backgroundColor: 'rgba(249, 115, 22, 0.7)',
+                borderColor: 'rgba(249, 115, 22, 1)',
+                borderWidth: 1,
+                borderRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Gráfico de Treinamentos
+    const treinamentosCtx = document.getElementById('treinamentosChart').getContext('2d');
+    new Chart(treinamentosCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Brigada de Incêndio', 'NR-35', 'Primeiros Socorros', 'Outros'],
+            datasets: [{
+                label: 'Tipos de Treinamento',
+                data: [45, 25, 20, 10],
+                backgroundColor: [
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(245, 158, 11, 0.8)',
+                    'rgba(107, 114, 128, 0.8)'
+                ],
+                borderColor: '#fff',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>
