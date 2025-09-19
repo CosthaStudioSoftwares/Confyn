@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CONFYN - Módulo Administrativo</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Ionicons CDN -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div class="flex h-screen bg-gray-100">
+        <!-- Barra de Navegação Lateral -->
+        <aside class="w-64 flex-shrink-0 bg-slate-900 text-gray-300 flex flex-col transition-all duration-300">
+            <!-- Logo -->
+            <div class="h-20 flex items-center justify-center px-4 border-b border-slate-800">
+                 <div class="flex items-center gap-3">
+                    <ion-icon name="shield-checkmark-outline" class="text-3xl text-orange-500"></ion-icon>
+                    <span class="text-white text-2xl font-bold">CONFYN</span>
+                </div>
+            </div>
+
+            <!-- Menu -->
+            <nav class="flex-1 px-4 py-6 space-y-2">
+                <a href="empresas.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
+                    <ion-icon name="business-outline" class="text-xl"></ion-icon>
+                    <span class="ml-4">Empresas</span>
+                </a>
+                <a href="turmas.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
+                    <ion-icon name="people-outline" class="text-xl"></ion-icon>
+                    <span class="ml-4">Alunos/Turmas</span>
+                </a>
+                <a href="financeiro.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
+                    <ion-icon name="cash-outline" class="text-xl"></ion-icon>
+                    <span class="ml-4">Financeiro</span>
+                </a>
+                <a href="colaboradores.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
+                    <ion-icon name="id-card-outline" class="text-xl"></ion-icon>
+                    <span class="ml-4">Colaboradores</span>
+                </a>
+                <a href="estoque.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
+                    <ion-icon name="cube-outline" class="text-xl"></ion-icon>
+                    <span class="ml-4">Estoque</span>
+                </a>
+                <a href="administrativo.html" class="flex items-center px-4 py-2.5 rounded-lg bg-orange-600 text-white font-semibold shadow-md">
+                    <ion-icon name="settings-outline" class="text-xl"></ion-icon>
+                    <span class="ml-4">Administrativo</span>
+                </a>
+            </nav>
+
+            <!-- Rodapé da Sidebar -->
+            <div class="p-4 border-t border-slate-800">
+                <a href="#" class="flex items-center text-sm">
+                    <ion-icon name="chevron-back-outline" class="text-xl"></ion-icon>
+                    <span class="ml-2">Recolher Menu</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <div class="flex-1 flex flex-col">
+            <!-- Cabeçalho Superior -->
+            <header class="h-20 bg-white border-b flex items-center justify-between px-8">
+                <div>
+                    <h1 class="text-xl font-bold text-gray-800">Administrativo</h1>
+                    <p class="text-sm text-gray-500">Dashboard / Administrativo</p>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div class="relative">
+                        <ion-icon name="search-outline" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></ion-icon>
+                        <input type="text" placeholder="Busca rápida..." class="pl-10 pr-4 py-2 w-64 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    </div>
+                    <ion-icon name="notifications-outline" class="text-2xl text-gray-600 cursor-pointer"></ion-icon>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-slate-300 flex items-center justify-center font-bold text-slate-600">UN</div>
+                        <div>
+                            <p class="font-semibold text-sm">Usuário Admin</p>
+                            <a href="index.html" class="text-xs text-orange-600 hover:underline">Sair</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Área de Conteúdo -->
+            <main class="flex-1 p-8 overflow-y-auto">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    
+                    <!-- Card: Gerenciar Usuários -->
+                    <div class="bg-white rounded-lg shadow p-6 flex flex-col items-start hover:shadow-lg transition-shadow">
+                        <div class="bg-orange-100 text-orange-600 p-3 rounded-full mb-4">
+                            <ion-icon name="people-circle-outline" class="text-3xl"></ion-icon>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800">Gerenciar Usuários</h3>
+                        <p class="text-gray-600 mt-2 text-sm">Adicione, edite e defina permissões para os usuários do sistema.</p>
+                        <a href="#" class="mt-4 text-orange-600 font-semibold hover:underline text-sm">Acessar</a>
+                    </div>
+
+                    <!-- Card: Configurações do Sistema -->
+                    <div class="bg-white rounded-lg shadow p-6 flex flex-col items-start hover:shadow-lg transition-shadow">
+                        <div class="bg-blue-100 text-blue-600 p-3 rounded-full mb-4">
+                            <ion-icon name="cog-outline" class="text-3xl"></ion-icon>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800">Configurações Gerais</h3>
+                        <p class="text-gray-600 mt-2 text-sm">Configure informações da empresa, padrões e outros ajustes do sistema.</p>
+                        <a href="#" class="mt-4 text-blue-600 font-semibold hover:underline text-sm">Ajustar</a>
+                    </div>
+                    
+                    <!-- Card: Logs de Atividade -->
+                    <div class="bg-white rounded-lg shadow p-6 flex flex-col items-start hover:shadow-lg transition-shadow">
+                        <div class="bg-green-100 text-green-600 p-3 rounded-full mb-4">
+                            <ion-icon name="document-text-outline" class="text-3xl"></ion-icon>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800">Logs de Atividade</h3>
+                        <p class="text-gray-600 mt-2 text-sm">Visualize o histórico de ações importantes realizadas no sistema.</p>
+                        <a href="#" class="mt-4 text-green-600 font-semibold hover:underline text-sm">Verificar</a>
+                    </div>
+                    
+                    <!-- Card: Backups -->
+                    <div class="bg-white rounded-lg shadow p-6 flex flex-col items-start hover:shadow-lg transition-shadow">
+                        <div class="bg-purple-100 text-purple-600 p-3 rounded-full mb-4">
+                            <ion-icon name="cloud-download-outline" class="text-3xl"></ion-icon>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800">Backups</h3>
+                        <p class="text-gray-600 mt-2 text-sm">Realize e gerencie cópias de segurança dos dados do seu sistema.</p>
+                        <a href="#" class="mt-4 text-purple-600 font-semibold hover:underline text-sm">Gerenciar</a>
+                    </div>
+                    
+                </div>
+            </main>
+        </div>
+    </div>
+
+</body>
+</html>
+

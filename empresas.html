@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CONFYN - Empresas</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Ionicons CDN -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div class="flex h-screen bg-gray-100">
+        <!-- Barra Lateral de Navegação -->
+        <aside id="sidebar" class="flex flex-col items-center w-64 bg-slate-900 text-gray-300 shadow-lg transition-all duration-300 ease-in-out">
+            <!-- Logo -->
+            <div class="flex items-center justify-center w-full h-20 border-b border-slate-800">
+                <ion-icon name="shield-checkmark-outline" class="text-3xl text-orange-500"></ion-icon>
+                <span class="ml-3 text-2xl font-bold text-white sidebar-text">CONFYN</span>
+            </div>
+
+            <!-- Menus -->
+            <nav id="sidebar-nav" class="flex-1 w-full px-4 pt-4 overflow-y-auto">
+                <a href="empresas.html" class="nav-item flex items-center w-full px-4 py-3 mb-2 text-white bg-slate-800 rounded-lg">
+                    <ion-icon name="business-outline" class="text-xl"></ion-icon>
+                    <span class="ml-4 sidebar-text">Empresas</span>
+                </a>
+                <a href="turmas.html" class="nav-item flex items-center w-full px-4 py-3 mb-2 rounded-lg hover:bg-slate-800 transition-colors">
+                    <ion-icon name="people-outline" class="text-xl"></ion-icon>
+                    <span class="ml-4 sidebar-text">Alunos/Turmas</span>
+                </a>
+                <a href="financeiro.html" class="nav-item flex items-center w-full px-4 py-3 mb-2 rounded-lg hover:bg-slate-800 transition-colors">
+                    <ion-icon name="cash-outline" class="text-xl"></ion-icon>
+                    <span class="ml-4 sidebar-text">Financeiro</span>
+                </a>
+                <a href="colaboradores.html" class="nav-item flex items-center w-full px-4 py-3 mb-2 rounded-lg hover:bg-slate-800 transition-colors">
+                    <ion-icon name="person-circle-outline" class="text-xl"></ion-icon>
+                    <span class="ml-4 sidebar-text">Colaboradores</span>
+                </a>
+                <a href="estoque.html" class="nav-item flex items-center w-full px-4 py-3 mb-2 rounded-lg hover:bg-slate-800 transition-colors">
+                    <ion-icon name="cube-outline" class="text-xl"></ion-icon>
+                    <span class="ml-4 sidebar-text">Estoque</span>
+                </a>
+                <div class="my-4 border-t border-slate-800"></div>
+                <a href="administrativo.html" class="nav-item flex items-center w-full px-4 py-3 mb-2 rounded-lg hover:bg-slate-800 transition-colors">
+                    <ion-icon name="settings-outline" class="text-xl"></ion-icon>
+                    <span class="ml-4 sidebar-text">Administrativo</span>
+                </a>
+            </nav>
+            
+            <div class="w-full h-16 flex items-center justify-center border-t border-slate-800">
+                <button id="toggleSidebar" class="p-3 rounded-lg hover:bg-slate-800 transition-colors">
+                    <ion-icon name="chevron-back-outline" class="text-xl"></ion-icon>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Cabeçalho Superior -->
+            <header class="flex items-center justify-between w-full h-20 px-6 bg-white border-b border-gray-200">
+                <div>
+                    <h2 class="text-2xl font-semibold text-gray-800">Empresas</h2>
+                    <p class="text-sm text-gray-500">Dashboard / Empresas</p>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <div class="relative"><ion-icon name="search-outline" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></ion-icon><input type="text" placeholder="Busca rápida..." class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"></div>
+                    <button class="p-2 relative rounded-full hover:bg-gray-100"><ion-icon name="notifications-outline" class="text-2xl text-gray-600"></ion-icon><span class="absolute top-1 right-1 block w-2 h-2 bg-orange-500 rounded-full"></span></button>
+                    <div class="flex items-center space-x-2"><img src="https://placehold.co/40x40/E2E8F0/4A5568?text=UN" alt="Avatar do usuário" class="w-10 h-10 rounded-full"><div><p class="font-semibold text-gray-700">Usuário</p><p class="text-sm text-gray-500">Admin</p></div></div>
+                </div>
+            </header>
+
+            <!-- Área de Conteúdo -->
+            <main class="flex-1 p-6 overflow-y-auto">
+                <div class="flex items-center justify-between mb-6">
+                    <h1 class="text-3xl font-bold text-gray-800">Listagem de Empresas</h1>
+                    <button class="flex items-center px-4 py-2 font-semibold text-white bg-orange-500 rounded-lg shadow-md hover:bg-orange-600 transition-colors">
+                        <ion-icon name="add-outline" class="mr-2 text-xl"></ion-icon>
+                        Adicionar Empresa
+                    </button>
+                </div>
+
+                <!-- Filtros -->
+                <div class="p-4 mb-6 bg-white rounded-lg shadow">
+                    <div class="flex items-center space-x-4">
+                        <select class="w-full p-2 border border-gray-300 rounded-lg">
+                            <option>Status: Todos</option>
+                            <option>Ativa</option>
+                            <option>Inativa</option>
+                            <option>Prospect</option>
+                        </select>
+                        <select class="w-full p-2 border border-gray-300 rounded-lg">
+                            <option>Cidade: Todas</option>
+                            <option>São Paulo</option>
+                            <option>Rio de Janeiro</option>
+                            <option>Belo Horizonte</option>
+                        </select>
+                        <button class="px-4 py-2 font-semibold text-white bg-slate-800 rounded-lg hover:bg-slate-900">Aplicar</button>
+                        <button class="px-4 py-2 font-semibold text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300">Limpar</button>
+                    </div>
+                </div>
+
+                <!-- Tabela de Empresas -->
+                <div class="overflow-x-auto bg-white rounded-lg shadow">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                                <th class="px-6 py-3 text-xs font-medium tracking-wider text-gray-500 uppercase">Nome da Empresa</th>
+                                <th class="px-6 py-3 text-xs font-medium tracking-wider text-gray-500 uppercase">CNPJ</th>
+                                <th class="px-6 py-3 text-xs font-medium tracking-wider text-gray-500 uppercase">Contato Principal</th>
+                                <th class="px-6 py-3 text-xs font-medium tracking-wider text-gray-500 uppercase">Cidade/UF</th>
+                                <th class="px-6 py-3 text-xs font-medium tracking-wider text-gray-500 uppercase">Status</th>
+                                <th class="px-6 py-3 text-xs font-medium tracking-wider text-gray-500 uppercase text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <!-- Linha de Exemplo 1 -->
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap"><div class="font-medium text-gray-900">Acme Corporation</div></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-500">00.111.222/0001-00</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-500">Ana Silva</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-500">São Paulo/SP</td>
+                                <td class="px-6 py-4 whitespace-nowrap"><span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Ativa</span></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center text-lg"><button class="text-gray-400 hover:text-orange-500 p-1"><ion-icon name="create-outline"></ion-icon></button><button class="text-gray-400 hover:text-red-500 p-1"><ion-icon name="trash-outline"></ion-icon></button></td>
+                            </tr>
+                            <!-- Linha de Exemplo 2 -->
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap"><div class="font-medium text-gray-900">Soluções XYZ Ltda</div></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-500">11.222.333/0001-11</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-500">Carlos Souza</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-500">Rio de Janeiro/RJ</td>
+                                <td class="px-6 py-4 whitespace-nowrap"><span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Inativa</span></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center text-lg"><button class="text-gray-400 hover:text-orange-500 p-1"><ion-icon name="create-outline"></ion-icon></button><button class="text-gray-400 hover:text-red-500 p-1"><ion-icon name="trash-outline"></ion-icon></button></td>
+                            </tr>
+                             <!-- Linha de Exemplo 3 -->
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap"><div class="font-medium text-gray-900">Tech Inovações</div></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-500">22.333.444/0001-22</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-500">Pedro Martins</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-500">Salvador/BA</td>
+                                <td class="px-6 py-4 whitespace-nowrap"><span class="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Prospect</span></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center text-lg"><button class="text-gray-400 hover:text-orange-500 p-1"><ion-icon name="create-outline"></ion-icon></button><button class="text-gray-400 hover:text-red-500 p-1"><ion-icon name="trash-outline"></ion-icon></button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                 <!-- Paginação -->
+                <div class="flex items-center justify-between mt-4">
+                    <span class="text-sm text-gray-600">Mostrando 1-3 de 3 empresas</span>
+                    <div class="flex items-center space-x-1">
+                        <button class="px-3 py-1 text-sm text-gray-500 bg-white border rounded-md hover:bg-gray-50">&lt; Anterior</button>
+                        <button class="px-3 py-1 text-sm text-white bg-slate-800 border rounded-md">1</button>
+                        <button class="px-3 py-1 text-sm text-gray-500 bg-white border rounded-md hover:bg-gray-50">Próximo &gt;</button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('toggleSidebar').addEventListener('click', () => {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarTexts = document.querySelectorAll('.sidebar-text');
+            const toggleIcon = document.querySelector('#toggleSidebar ion-icon');
+            sidebar.classList.toggle('w-64');
+            sidebar.classList.toggle('w-20');
+            sidebarTexts.forEach(text => text.classList.toggle('hidden'));
+            toggleIcon.setAttribute('name', sidebar.classList.contains('w-20') ? 'chevron-forward-outline' : 'chevron-back-outline');
+        });
+    </script>
+</body>
+</html>
