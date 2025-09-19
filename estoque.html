@@ -4,36 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CONFYN - Módulo de Estoque</title>
-    
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
+
     <!-- Ionicons CDN -->
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     
+    <!-- PDF Generation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+
     <style>
-        body { 
-            font-family: 'Inter', sans-serif; 
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+        .modal-backdrop {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); z-index: 40;
         }
-        /* Custom scrollbar for better aesthetics */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #d1d5db;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #9ca3af;
+        .modal {
+            display: none; position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); z-index: 50;
         }
     </style>
 </head>
@@ -44,7 +45,7 @@
         <aside class="w-64 flex-shrink-0 bg-slate-900 text-gray-300 flex flex-col transition-all duration-300">
             <!-- Logo -->
             <div class="h-20 flex items-center justify-center px-4 border-b border-slate-800">
-                 <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3">
                     <ion-icon name="shield-checkmark-outline" class="text-3xl text-orange-500"></ion-icon>
                     <span class="text-white text-2xl font-bold">CONFYN</span>
                 </div>
@@ -81,14 +82,6 @@
                     <span class="ml-4">Administrativo</span>
                 </a>
             </nav>
-
-            <!-- Rodapé da Sidebar -->
-            <div class="p-4 border-t border-slate-800">
-                <a href="#" class="flex items-center text-sm">
-                    <ion-icon name="chevron-back-outline" class="text-xl"></ion-icon>
-                    <span class="ml-2">Recolher Menu</span>
-                </a>
-            </div>
         </aside>
 
         <!-- Conteúdo Principal -->
@@ -100,16 +93,16 @@
                     <p class="text-sm text-gray-500">Dashboard / Estoque</p>
                 </div>
                 <div class="flex items-center gap-6">
-                    <div class="relative">
+                     <div class="relative">
                         <ion-icon name="search-outline" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></ion-icon>
-                        <input type="text" placeholder="Busca rápida..." class="pl-10 pr-4 py-2 w-64 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        <input type="text" id="search-input" placeholder="Pesquisar por nome ou código..." class="pl-10 pr-4 py-2 w-64 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
                     </div>
                     <ion-icon name="notifications-outline" class="text-2xl text-gray-600 cursor-pointer"></ion-icon>
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-slate-300 flex items-center justify-center font-bold text-slate-600">UN</div>
+                        <div class="w-10 h-10 rounded-full bg-slate-300 flex items-center justify-center font-bold text-slate-600" id="user-initials">UN</div>
                         <div>
-                            <p class="font-semibold text-sm">Usuário Admin</p>
-                            <a href="index.html" class="text-xs text-orange-600 hover:underline">Sair</a>
+                            <p class="font-semibold text-sm" id="user-name">Usuário</p>
+                            <a href="#" id="logout-button" class="text-xs text-orange-600 hover:underline">Sair</a>
                         </div>
                     </div>
                 </div>
@@ -117,62 +110,41 @@
 
             <!-- Área de Conteúdo -->
             <main class="flex-1 p-8 overflow-y-auto">
-                <!-- Indicadores de Estoque -->
-                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <!-- Indicadores -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                     <div class="bg-white p-6 rounded-lg shadow-sm">
                         <p class="text-sm text-gray-500">Total de Itens</p>
-                        <p class="text-2xl font-bold text-gray-800">128</p>
+                        <p class="text-2xl font-bold text-gray-800" id="total-itens">0</p>
                     </div>
                     <div class="bg-white p-6 rounded-lg shadow-sm">
                         <p class="text-sm text-gray-500">Itens com Estoque Baixo</p>
-                        <p class="text-2xl font-bold text-red-600">5</p>
+                        <p class="text-2xl font-bold text-red-600" id="itens-baixo-estoque">0</p>
                     </div>
-                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                     <div class="bg-white p-6 rounded-lg shadow-sm">
                         <p class="text-sm text-gray-500">Valor Total em Estoque</p>
-                        <p class="text-2xl font-bold text-green-600">R$ 15.780,00</p>
+                        <p class="text-2xl font-bold text-green-600" id="valor-total-estoque">R$ 0,00</p>
                     </div>
                 </div>
 
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-semibold text-gray-700">Inventário</h2>
-                     <div class="flex gap-4">
-                        <button class="flex items-center gap-2 bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-600 transition-colors">
-                            <ion-icon name="arrow-down-outline" class="text-xl"></ion-icon>
-                            <span>Registrar Entrada</span>
+                    <div class="flex gap-4">
+                        <button id="entrada-button" class="flex items-center gap-2 bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-600 transition-colors">
+                            <ion-icon name="arrow-down-outline"></ion-icon> Registrar Entrada
                         </button>
-                        <button class="flex items-center gap-2 bg-yellow-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-yellow-600 transition-colors">
-                            <ion-icon name="arrow-up-outline" class="text-xl"></ion-icon>
-                            <span>Registrar Saída</span>
+                        <button id="saida-button" class="flex items-center gap-2 bg-yellow-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-yellow-600 transition-colors">
+                            <ion-icon name="arrow-up-outline"></ion-icon> Registrar Saída
                         </button>
-                        <button class="flex items-center gap-2 bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 transition-colors">
-                            <ion-icon name="add-outline" class="text-xl"></ion-icon>
-                            <span>Adicionar Novo Item</span>
+                        <button id="add-item-button" class="flex items-center gap-2 bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 transition-colors">
+                            <ion-icon name="add-outline"></ion-icon> Adicionar Novo Item
                         </button>
                     </div>
                 </div>
-
-                <!-- Filtros -->
-                <div class="bg-white p-4 rounded-lg shadow-sm mb-6 flex items-center gap-4">
-                    <div class="flex items-center gap-2">
-                        <label for="categoria-filter" class="text-sm font-medium text-gray-700">Categoria:</label>
-                        <select id="categoria-filter" class="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
-                            <option>Todas</option>
-                            <option>EPI</option>
-                            <option>Material de Treinamento</option>
-                            <option>Uniforme</option>
-                        </select>
-                    </div>
-                     <div class="flex items-center gap-2">
-                        <label for="status-filter" class="text-sm font-medium text-gray-700">Status:</label>
-                        <select id="status-filter" class="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
-                            <option>Todos</option>
-                            <option>Em Estoque</option>
-                            <option>Estoque Baixo</option>
-                            <option>Esgotado</option>
-                        </select>
-                    </div>
-                    <button class="bg-slate-800 text-white font-semibold py-1.5 px-4 rounded-lg hover:bg-slate-700 transition-colors text-sm">Aplicar</button>
-                    <button class="text-gray-600 hover:text-gray-800 font-medium text-sm">Limpar</button>
+                 <div class="bg-white p-4 rounded-lg shadow-sm mb-6 flex items-center gap-4">
+                     <!-- Adicione filtros se necessário no futuro -->
+                     <button id="download-report-button" class="flex items-center gap-2 bg-green-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-green-600 transition-colors">
+                        <ion-icon name="download-outline"></ion-icon> Baixar Relatório
+                    </button>
                 </div>
 
                 <!-- Tabela de Itens -->
@@ -180,55 +152,449 @@
                     <table class="w-full text-sm text-left text-gray-600">
                         <thead class="bg-gray-50 text-xs text-gray-700 uppercase tracking-wider">
                             <tr>
-                                <th class="p-4">Item</th>
+                                <th class="p-4">Nome do Item</th>
+                                <th class="p-4">Código</th>
                                 <th class="p-4">Categoria</th>
-                                <th class="p-4">Qtd. em Estoque</th>
-                                <th class="p-4">Estoque Mínimo</th>
+                                <th class="p-4">Quantidade</th>
+                                <th class="p-4">Valor Unit.</th>
                                 <th class="p-4">Status</th>
                                 <th class="p-4">Ações</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">Capacete de Segurança</td>
-                                <td class="p-4">EPI</td>
-                                <td class="p-4 font-semibold">25 un.</td>
-                                <td class="p-4">10 un.</td>
-                                <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Em Estoque</span></td>
-                                <td class="p-4 flex gap-4 text-gray-500">
-                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600" title="Editar"></ion-icon>
-                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600" title="Excluir"></ion-icon>
-                                </td>
-                            </tr>
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">Luva de Raspa</td>
-                                <td class="p-4">EPI</td>
-                                <td class="p-4 font-semibold text-orange-600">8 pares</td>
-                                <td class="p-4">15 pares</td>
-                                <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800">Estoque Baixo</span></td>
-                                <td class="p-4 flex gap-4 text-gray-500">
-                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600" title="Editar"></ion-icon>
-                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600" title="Excluir"></ion-icon>
-                                </td>
-                            </tr>
-                            <tr class="hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">Cone de Sinalização</td>
-                                <td class="p-4">Material de Treinamento</td>
-                                <td class="p-4 font-semibold text-red-600">0 un.</td>
-                                <td class="p-4">5 un.</td>
-                                <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Esgotado</span></td>
-                                <td class="p-4 flex gap-4 text-gray-500">
-                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600" title="Editar"></ion-icon>
-                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600" title="Excluir"></ion-icon>
-                                </td>
-                            </tr>
+                        <tbody id="inventory-table-body">
+                           <tr><td colspan="7" class="text-center p-8">Carregando dados...</td></tr>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Paginação -->
+                <div class="flex justify-between items-center mt-6">
+                    <span id="pagination-info" class="text-sm text-gray-600">Mostrando 0-0 de 0 itens</span>
+                    <div class="flex gap-2">
+                        <button id="prev-page-button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border rounded-lg hover:bg-gray-100 disabled:opacity-50" disabled>Anterior</button>
+                        <button id="next-page-button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border rounded-lg hover:bg-gray-100 disabled:opacity-50" disabled>Próximo</button>
+                    </div>
                 </div>
             </main>
         </div>
     </div>
+    
+    <!-- Modal para Adicionar/Editar Item -->
+    <div id="item-modal-backdrop" class="modal-backdrop"></div>
+    <div id="item-modal" class="modal bg-white rounded-lg shadow-xl w-full max-w-lg">
+        <div class="p-6 border-b"><h3 id="item-modal-title" class="text-xl font-semibold">Adicionar Novo Item</h3></div>
+        <form id="item-form" class="p-6">
+            <input type="hidden" id="item-id">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="col-span-2">
+                    <label for="item-nome" class="block text-sm font-medium">Nome do Item</label>
+                    <input type="text" id="item-nome" class="mt-1 w-full border-gray-300 rounded-md" required>
+                    <p id="item-nome-error" class="text-red-500 text-xs mt-1 hidden"></p>
+                </div>
+                <div>
+                    <label for="item-codigo" class="block text-sm font-medium">Código do Produto</label>
+                    <input type="text" id="item-codigo" class="mt-1 w-full border-gray-300 rounded-md" required>
+                    <p id="item-codigo-error" class="text-red-500 text-xs mt-1 hidden"></p>
+                </div>
+                <div>
+                    <label for="item-valor" class="block text-sm font-medium">Valor (R$)</label>
+                    <input type="text" id="item-valor" class="mt-1 w-full border-gray-300 rounded-md" placeholder="100,00" required>
+                </div>
+                 <div class="col-span-2">
+                    <label for="item-categoria" class="block text-sm font-medium">Categoria</label>
+                    <select id="item-categoria" class="mt-1 w-full border-gray-300 rounded-md" required>
+                        <option>EPI</option>
+                        <option>Material de Treinamento</option>
+                        <option>Uniformes</option>
+                        <option>Equipamentos de Combate a Incêndio</option>
+                        <option>Material de Primeiros Socorros</option>
+                        <option>Material de Escritório</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="item-quantidade" class="block text-sm font-medium">Quantidade Inicial</label>
+                    <input type="number" id="item-quantidade" min="0" class="mt-1 w-full border-gray-300 rounded-md" required>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end gap-4">
+                <button type="button" id="cancel-item-modal" class="px-4 py-2 bg-gray-200 rounded-lg">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-orange-500 text-white rounded-lg">Salvar</button>
+            </div>
+        </form>
+    </div>
 
+    <!-- Modal para Entrada/Saída -->
+    <div id="movimento-modal-backdrop" class="modal-backdrop"></div>
+    <div id="movimento-modal" class="modal bg-white rounded-lg shadow-xl w-full max-w-md">
+        <div class="p-6 border-b"><h3 id="movimento-modal-title" class="text-xl font-semibold">Registrar</h3></div>
+        <form id="movimento-form" class="p-6">
+            <div>
+                <label for="movimento-item" class="block text-sm font-medium">Item</label>
+                <select id="movimento-item" class="mt-1 w-full border-gray-300 rounded-md" required></select>
+            </div>
+            <div class="mt-4">
+                <label for="movimento-quantidade" class="block text-sm font-medium">Quantidade</label>
+                <input type="number" id="movimento-quantidade" min="1" class="mt-1 w-full border-gray-300 rounded-md" required>
+                 <p id="movimento-error" class="text-red-500 text-xs mt-1 hidden"></p>
+            </div>
+             <div class="mt-6 flex justify-end gap-4">
+                <button type="button" id="cancel-movimento-modal" class="px-4 py-2 bg-gray-200 rounded-lg">Cancelar</button>
+                <button type="submit" id="submit-movimento-button" class="px-4 py-2 text-white rounded-lg">Confirmar</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc, query, orderBy, where, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        
+        // ====================================================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDJEFwpP0GuuBugz4KFgzwdJTlhXS3H7w8",
+            authDomain: "confyn-47447.firebaseapp.com",
+            projectId: "confyn-47447",
+            storageBucket: "confyn-47447.firebasestorage.app",
+            messagingSenderId: "292650745185",
+            appId: "1:292650745185:web:2e1555246eb1b14c115920"
+        };
+        // ====================================================================================
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- AUTH & SECURITY ---
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                const userName = user.email.split('@')[0];
+                document.getElementById('user-name').textContent = userName;
+                document.getElementById('user-initials').textContent = userName.substring(0, 2).toUpperCase();
+                fetchItems();
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+        document.getElementById('logout-button').addEventListener('click', () => signOut(auth));
+
+        // --- GLOBAL STATE ---
+        let allItems = [];
+        let filteredItems = [];
+        let currentPage = 1;
+        const itemsPerPage = 5;
+        let isEntrada = true;
+
+        // --- MODAL ITEM ---
+        const itemModal = document.getElementById('item-modal');
+        const itemModalBackdrop = document.getElementById('item-modal-backdrop');
+        const itemForm = document.getElementById('item-form');
+
+        const openItemModal = (item = null) => {
+            itemForm.reset();
+            document.getElementById('item-id').value = '';
+            document.getElementById('item-nome-error').classList.add('hidden');
+            document.getElementById('item-codigo-error').classList.add('hidden');
+            document.getElementById('item-quantidade').disabled = false;
+
+            if (item) {
+                document.getElementById('item-modal-title').textContent = 'Editar Item';
+                document.getElementById('item-id').value = item.id;
+                document.getElementById('item-nome').value = item.nome;
+                document.getElementById('item-codigo').value = item.codigo;
+                document.getElementById('item-valor').value = item.valor.toFixed(2).replace('.', ',');
+                document.getElementById('item-categoria').value = item.categoria;
+                document.getElementById('item-quantidade').value = item.quantidade;
+                document.getElementById('item-quantidade').disabled = true; // Quantidade só muda por entrada/saída
+            } else {
+                document.getElementById('item-modal-title').textContent = 'Adicionar Novo Item';
+            }
+            itemModal.style.display = 'block';
+            itemModalBackdrop.style.display = 'block';
+        };
+        const closeItemModal = () => {
+            itemModal.style.display = 'none';
+            itemModalBackdrop.style.display = 'none';
+        };
+
+        document.getElementById('add-item-button').addEventListener('click', () => openItemModal());
+        document.getElementById('cancel-item-modal').addEventListener('click', closeItemModal);
+
+        // --- MODAL MOVIMENTO ---
+        const movimentoModal = document.getElementById('movimento-modal');
+        const movimentoModalBackdrop = document.getElementById('movimento-modal-backdrop');
+        const movimentoForm = document.getElementById('movimento-form');
+        const movimentoError = document.getElementById('movimento-error');
+
+        const openMovimentoModal = (isEntradaMode) => {
+            isEntrada = isEntradaMode;
+            movimentoForm.reset();
+            movimentoError.classList.add('hidden');
+
+            const title = isEntrada ? 'Registrar Entrada' : 'Registrar Saída';
+            const btnClass = isEntrada ? 'bg-blue-500 hover:bg-blue-600' : 'bg-yellow-500 hover:bg-yellow-600';
+            
+            document.getElementById('movimento-modal-title').textContent = title;
+            const submitBtn = document.getElementById('submit-movimento-button');
+            submitBtn.className = `px-4 py-2 text-white rounded-lg ${btnClass}`;
+            submitBtn.textContent = isEntrada ? 'Confirmar Entrada' : 'Confirmar Saída';
+
+            const itemSelect = document.getElementById('movimento-item');
+            itemSelect.innerHTML = '<option value="">Selecione um item</option>';
+            allItems.forEach(item => {
+                itemSelect.innerHTML += `<option value="${item.id}">${item.nome} (${item.quantidade} em estoque)</option>`;
+            });
+
+            movimentoModal.style.display = 'block';
+            movimentoModalBackdrop.style.display = 'block';
+        };
+        const closeMovimentoModal = () => {
+            movimentoModal.style.display = 'none';
+            movimentoModalBackdrop.style.display = 'none';
+        };
+
+        document.getElementById('entrada-button').addEventListener('click', () => openMovimentoModal(true));
+        document.getElementById('saida-button').addEventListener('click', () => openMovimentoModal(false));
+        document.getElementById('cancel-movimento-modal').addEventListener('click', closeMovimentoModal);
+
+
+        // --- CRUD & DATA LOGIC ---
+        async function fetchItems() {
+            try {
+                const q = query(collection(db, "estoque"), orderBy("nome"));
+                const querySnapshot = await getDocs(q);
+                allItems = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                applyFiltersAndSearch();
+            } catch (error) {
+                console.error("Erro ao buscar itens: ", error);
+            }
+        }
+        
+        async function checkUniqueness(field, value, currentId = null) {
+            const q = query(collection(db, "estoque"), where(field, "==", value));
+            const querySnapshot = await getDocs(q);
+            if (querySnapshot.empty) return true;
+            if (currentId && querySnapshot.docs[0].id === currentId) return true;
+            return false;
+        }
+
+        itemForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const itemId = document.getElementById('item-id').value;
+            const nome = document.getElementById('item-nome').value;
+            const codigo = document.getElementById('item-codigo').value;
+            const valor = parseFloat(document.getElementById('item-valor').value.replace(',', '.'));
+
+            // Validações
+            const isNomeUnique = await checkUniqueness('nome', nome, itemId);
+            if(!isNomeUnique) {
+                document.getElementById('item-nome-error').textContent = 'Nome já cadastrado.';
+                document.getElementById('item-nome-error').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('item-nome-error').classList.add('hidden');
+
+            const isCodigoUnique = await checkUniqueness('codigo', codigo, itemId);
+            if(!isCodigoUnique) {
+                document.getElementById('item-codigo-error').textContent = 'Código já cadastrado.';
+                document.getElementById('item-codigo-error').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('item-codigo-error').classList.add('hidden');
+
+            const itemData = {
+                nome, codigo, valor,
+                categoria: document.getElementById('item-categoria').value,
+                quantidade: parseInt(document.getElementById('item-quantidade').value)
+            };
+
+            try {
+                if (itemId) {
+                    delete itemData.quantidade; // Não atualiza quantidade aqui
+                    await updateDoc(doc(db, "estoque", itemId), itemData);
+                } else {
+                    await addDoc(collection(db, "estoque"), itemData);
+                }
+                closeItemModal();
+                fetchItems();
+            } catch (error) {
+                console.error("Erro ao salvar item:", error);
+            }
+        });
+
+        movimentoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const itemId = document.getElementById('movimento-item').value;
+            const quantidade = parseInt(document.getElementById('movimento-quantidade').value);
+            
+            if (!itemId || !quantidade || quantidade <= 0) return;
+
+            const itemRef = doc(db, "estoque", itemId);
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const itemDoc = await transaction.get(itemRef);
+                    if (!itemDoc.exists()) throw "Documento não existe!";
+
+                    const currentQuantity = itemDoc.data().quantidade;
+                    let newQuantity = isEntrada ? currentQuantity + quantidade : currentQuantity - quantidade;
+
+                    if (newQuantity < 0) {
+                        movimentoError.textContent = `Saída excede o estoque atual (${currentQuantity} unidades).`;
+                        movimentoError.classList.remove('hidden');
+                        throw "Estoque insuficiente";
+                    }
+                    
+                    transaction.update(itemRef, { quantidade: newQuantity });
+                });
+                console.log("Transação bem-sucedida!");
+                closeMovimentoModal();
+                fetchItems();
+            } catch (error) {
+                console.error("Erro na transação: ", error);
+            }
+        });
+        
+        window.editItem = (id) => {
+            const item = allItems.find(i => i.id === id);
+            if(item) openItemModal(item);
+        }
+
+        window.deleteItem = async (id) => {
+            if (confirm('Tem certeza que deseja excluir este item?')) {
+                await deleteDoc(doc(db, "estoque", id));
+                fetchItems();
+            }
+        }
+
+        // --- DISPLAY & FILTERS ---
+        function applyFiltersAndSearch() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            filteredItems = allItems.filter(item => {
+                return !searchTerm ||
+                    item.nome.toLowerCase().includes(searchTerm) ||
+                    item.codigo.toLowerCase().includes(searchTerm);
+            });
+            currentPage = 1;
+            displayItems();
+            updateStats();
+        }
+
+        function displayItems() {
+            const tableBody = document.getElementById('inventory-table-body');
+            tableBody.innerHTML = '';
+            if (filteredItems.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="7" class="text-center p-8">Nenhum item encontrado.</td></tr>`;
+                updatePaginationControls();
+                return;
+            }
+
+            const paginated = filteredItems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+            paginated.forEach(item => {
+                let status, statusClass;
+                if (item.quantidade === 0) {
+                    status = 'Esgotado';
+                    statusClass = 'bg-red-100 text-red-800';
+                } else if (item.quantidade < 10) {
+                    status = 'Estoque Baixo';
+                    statusClass = 'bg-yellow-100 text-yellow-800';
+                } else {
+                    status = 'Em Estoque';
+                    statusClass = 'bg-green-100 text-green-800';
+                }
+
+                const row = `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-4 font-medium">${item.nome}</td>
+                        <td class="p-4 text-gray-500">${item.codigo}</td>
+                        <td class="p-4">${item.categoria}</td>
+                        <td class="p-4 font-semibold">${item.quantidade}</td>
+                        <td class="p-4">${item.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
+                        <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full ${statusClass}">${status}</span></td>
+                        <td class="p-4 flex gap-4">
+                            <ion-icon onclick="editItem('${item.id}')" name="create-outline" class="cursor-pointer hover:text-blue-600"></ion-icon>
+                            <ion-icon onclick="deleteItem('${item.id}')" name="trash-outline" class="cursor-pointer hover:text-red-600"></ion-icon>
+                        </td>
+                    </tr>`;
+                tableBody.innerHTML += row;
+            });
+            updatePaginationControls();
+        }
+        
+        document.getElementById('search-input').addEventListener('input', applyFiltersAndSearch);
+
+        // --- STATS & PAGINATION & REPORT ---
+        function updateStats() {
+            document.getElementById('total-itens').textContent = allItems.length;
+            document.getElementById('itens-baixo-estoque').textContent = allItems.filter(i => i.quantidade < 10 && i.quantidade > 0).length;
+            const totalValue = allItems.reduce((sum, item) => sum + (item.valor * item.quantidade), 0);
+            document.getElementById('valor-total-estoque').textContent = totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+        
+        function updatePaginationControls() {
+            const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+            document.getElementById('pagination-info').textContent = `Mostrando ${filteredItems.length > 0 ? (currentPage-1)*itemsPerPage+1 : 0}-${Math.min(currentPage*itemsPerPage, filteredItems.length)} de ${filteredItems.length} itens`;
+            document.getElementById('prev-page-button').disabled = currentPage === 1;
+            document.getElementById('next-page-button').disabled = currentPage === totalPages || totalPages === 0;
+        }
+
+        document.getElementById('prev-page-button').addEventListener('click', () => { if (currentPage > 1) { currentPage--; displayItems(); }});
+        document.getElementById('next-page-button').addEventListener('click', () => { if (currentPage < Math.ceil(filteredItems.length / itemsPerPage)) { currentPage++; displayItems(); }});
+        
+        document.getElementById('download-report-button').addEventListener('click', () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(20);
+            doc.setTextColor('#2c3e50');
+            doc.text("Relatório de Estoque - CONFYN", 14, 22);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, 30);
+            
+            const groupedByCategory = filteredItems.reduce((acc, item) => {
+                (acc[item.categoria] = acc[item.categoria] || []).push(item);
+                return acc;
+            }, {});
+
+            let startY = 45;
+            for (const category in groupedByCategory) {
+                const items = groupedByCategory[category];
+                const tableData = items.map(i => {
+                     let status = i.quantidade === 0 ? 'Esgotado' : (i.quantidade < 10 ? 'Baixo' : 'Ok');
+                     return [ i.nome, i.codigo, i.quantidade, i.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), status ];
+                });
+
+                doc.autoTable({
+                    startY: startY,
+                    head: [[`Categoria: ${category}`]],
+                    headStyles: { fillColor: '#e2e8f0', textColor: '#1e293b' },
+                    body: [],
+                    theme: 'grid'
+                });
+                
+                doc.autoTable({
+                    startY: doc.autoTable.previous.finalY,
+                    head: [['Nome', 'Código', 'Qtd.', 'Valor Unit.', 'Status']],
+                    body: tableData,
+                    theme: 'striped',
+                    headStyles: { fillColor: '#f97316' },
+                });
+                startY = doc.autoTable.previous.finalY + 10;
+            }
+            
+            doc.save('Relatorio_Estoque_CONFYN.pdf');
+        });
+        
+        // --- HELPERS ---
+        document.getElementById('item-valor').addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            value = (parseInt(value) / 100).toFixed(2).toString().replace('.', ',');
+            e.target.value = value;
+        });
+
+    </script>
 </body>
 </html>
 
