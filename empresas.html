@@ -230,7 +230,7 @@
                 </div>
                  <div>
                     <label for="telefone" class="block mb-2 text-sm font-medium text-gray-600">Telefone</label>
-                    <input type="text" id="telefone" class="w-full px-3 py-2 border rounded-lg" required>
+                    <input type="text" id="telefone" class="w-full px-3 py-2 border rounded-lg" placeholder="(XX) XXXXX-XXXX" required>
                      <p id="telefone-error" class="text-red-500 text-xs mt-1 hidden"></p>
                 </div>
                  <div class="col-span-2">
@@ -318,6 +318,7 @@
         const modal = document.getElementById('company-modal');
         const modalBackdrop = document.getElementById('company-modal-backdrop');
         const companyForm = document.getElementById('company-form');
+        const telefoneInput = document.getElementById('telefone');
 
         const openModal = (company = null) => {
             companyForm.reset();
@@ -355,7 +356,25 @@
         document.getElementById('cancel-modal-button').addEventListener('click', closeModal);
         modalBackdrop.addEventListener('click', closeModal);
 
-        // --- VALIDAÇÕES ---
+        // --- FORMATAÇÃO E VALIDAÇÕES ---
+        const formatarTelefone = (event) => {
+            let input = event.target;
+            let value = input.value.replace(/\D/g, ''); // Remove todos os não-dígitos
+            value = value.substring(0, 11); // Limita a 11 dígitos (DDD + 9 dígitos)
+
+            if (value.length > 6) {
+                value = `(${value.substring(0, 2)}) ${value.substring(2, 7)}-${value.substring(7)}`;
+            } else if (value.length > 2) {
+                value = `(${value.substring(0, 2)}) ${value.substring(2)}`;
+            } else if (value.length > 0) {
+                value = `(${value}`;
+            }
+            
+            input.value = value;
+        };
+
+        telefoneInput.addEventListener('input', formatarTelefone);
+
         async function checkUniqueness(field, value, currentId = null) {
             const q = query(collection(db, "empresas"), where(field, "==", value));
             const querySnapshot = await getDocs(q);
@@ -367,7 +386,7 @@
         function validateCNPJ(cnpj) {
             cnpj = cnpj.replace(/[^\d]+/g,'');
             if(cnpj == '' || cnpj.length != 14) return false;
-            // Validação simples de formato, pode ser substituída por uma mais complexa
+            // Validação simples de formato
             return true; 
         }
 
