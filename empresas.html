@@ -16,24 +16,34 @@
     <!-- Ionicons CDN -->
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+    <!-- PDF Generation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
     
     <style>
-        body { 
-            font-family: 'Inter', sans-serif; 
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 40;
         }
-        /* Custom scrollbar for better aesthetics */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #d1d5db;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #9ca3af;
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 50;
         }
     </style>
 </head>
@@ -81,14 +91,6 @@
                     <span class="ml-4">Administrativo</span>
                 </a>
             </nav>
-
-            <!-- Rodapé da Sidebar -->
-            <div class="p-4 border-t border-slate-800">
-                <a href="#" class="flex items-center text-sm">
-                    <ion-icon name="chevron-back-outline" class="text-xl"></ion-icon>
-                    <span class="ml-2">Recolher Menu</span>
-                </a>
-            </div>
         </aside>
 
         <!-- Conteúdo Principal -->
@@ -102,14 +104,14 @@
                 <div class="flex items-center gap-6">
                     <div class="relative">
                         <ion-icon name="search-outline" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></ion-icon>
-                        <input type="text" placeholder="Busca rápida..." class="pl-10 pr-4 py-2 w-64 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        <input type="text" id="search-input" placeholder="Pesquisar por nome, CNPJ, e-mail..." class="pl-10 pr-4 py-2 w-64 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
                     </div>
                     <ion-icon name="notifications-outline" class="text-2xl text-gray-600 cursor-pointer"></ion-icon>
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-slate-300 flex items-center justify-center font-bold text-slate-600">UN</div>
+                        <div class="w-10 h-10 rounded-full bg-slate-300 flex items-center justify-center font-bold text-slate-600" id="user-initials">UN</div>
                         <div>
-                            <p class="font-semibold text-sm">Usuário Admin</p>
-                            <a href="index.html" class="text-xs text-orange-600 hover:underline">Sair</a>
+                            <p class="font-semibold text-sm" id="user-name">Usuário</p>
+                            <a href="#" id="logout-button" class="text-xs text-orange-600 hover:underline">Sair</a>
                         </div>
                     </div>
                 </div>
@@ -118,51 +120,58 @@
             <!-- Área de Conteúdo -->
             <main class="flex-1 p-8 overflow-y-auto">
                 <!-- Indicadores -->
-                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                     <div class="bg-white p-6 rounded-lg shadow-sm">
                         <p class="text-sm text-gray-500">Total de Clientes</p>
-                        <p class="text-2xl font-bold text-gray-800">85</p>
+                        <p class="text-2xl font-bold text-gray-800" id="total-clientes">0</p>
                     </div>
                     <div class="bg-white p-6 rounded-lg shadow-sm">
                         <p class="text-sm text-gray-500">Clientes Ativos</p>
-                        <p class="text-2xl font-bold text-green-600">78</p>
+                        <p class="text-2xl font-bold text-green-600" id="clientes-ativos">0</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-sm">
+                        <p class="text-sm text-gray-500">Clientes Inativos</p>
+                        <p class="text-2xl font-bold text-gray-500" id="clientes-inativos">0</p>
                     </div>
                     <div class="bg-white p-6 rounded-lg shadow-sm">
                         <p class="text-sm text-gray-500">Potenciais Clientes</p>
-                        <p class="text-2xl font-bold text-blue-600">7</p>
+                        <p class="text-2xl font-bold text-blue-600" id="potenciais-clientes">0</p>
                     </div>
                 </div>
 
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-semibold text-gray-700">Listagem de Empresas</h2>
-                    <button class="flex items-center gap-2 bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 transition-colors">
-                        <ion-icon name="add-outline" class="text-xl"></ion-icon>
-                        <span>Adicionar Empresa</span>
-                    </button>
+                    <div class="flex gap-4">
+                        <button id="download-report-button" class="flex items-center gap-2 bg-green-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-green-600 transition-colors">
+                            <ion-icon name="download-outline" class="text-xl"></ion-icon>
+                            <span>Baixar Relatório</span>
+                        </button>
+                        <button id="add-company-button" class="flex items-center gap-2 bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 transition-colors">
+                            <ion-icon name="add-outline" class="text-xl"></ion-icon>
+                            <span>Adicionar Empresa</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Filtros -->
                 <div class="bg-white p-4 rounded-lg shadow-sm mb-6 flex items-center gap-4">
                     <div class="flex items-center gap-2">
-                        <label for="status-filter" class="text-sm font-medium text-gray-700">Status:</label>
+                        <label class="text-sm font-medium text-gray-700">Status:</label>
                         <select id="status-filter" class="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
-                            <option>Todos</option>
-                            <option>Ativa</option>
-                            <option>Inativa</option>
-                            <option>Potencial Cliente</option>
+                            <option value="Todos">Todos</option>
+                            <option value="Ativa">Ativa</option>
+                            <option value="Inativa">Inativa</option>
+                            <option value="Potencial Cliente">Potencial Cliente</option>
                         </select>
                     </div>
-                     <div class="flex items-center gap-2">
-                        <label for="cidade-filter" class="text-sm font-medium text-gray-700">Cidade:</label>
-                        <select id="cidade-filter" class="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
-                            <option>Todas</option>
-                            <option>São Paulo</option>
-                            <option>Rio de Janeiro</option>
-                            <option>Salvador</option>
+                    <div class="flex items-center gap-2">
+                        <label class="text-sm font-medium text-gray-700">Cidade:</label>
+                        <select id="city-filter" class="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                            <option value="Todas">Todas</option>
                         </select>
                     </div>
-                    <button class="bg-slate-800 text-white font-semibold py-1.5 px-4 rounded-lg hover:bg-slate-700 transition-colors text-sm">Aplicar</button>
-                    <button class="text-gray-600 hover:text-gray-800 font-medium text-sm">Limpar</button>
+                    <button id="apply-filters-button" class="bg-slate-800 text-white font-semibold py-1.5 px-4 rounded-lg hover:bg-slate-700 transition-colors text-sm">Aplicar</button>
+                    <button id="clear-filters-button" class="text-gray-600 hover:text-gray-800 font-medium text-sm">Limpar</button>
                 </div>
 
                 <!-- Tabela de Empresas -->
@@ -173,55 +182,460 @@
                                 <th class="p-4">Nome da Empresa</th>
                                 <th class="p-4">CNPJ</th>
                                 <th class="p-4">Contato Principal</th>
+                                <th class="p-4">Cidade/UF</th>
                                 <th class="p-4">Status</th>
                                 <th class="p-4">Ações</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900 flex items-center gap-2">
-                                    <span>Acme Corporation</span>
-                                    <ion-icon name="alert-circle-outline" class="text-lg text-red-500" title="Reciclagem de brigada vence em 15 dias!"></ion-icon>
-                                </td>
-                                <td class="p-4">00.111.222/0001-00</td>
-                                <td class="p-4">Ana Silva</td>
-                                <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Ativa</span></td>
-                                <td class="p-4 flex gap-4 text-gray-500">
-                                    <ion-icon name="eye-outline" class="text-lg cursor-pointer hover:text-orange-600" title="Ver Detalhes"></ion-icon>
-                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600" title="Editar"></ion-icon>
-                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600" title="Excluir"></ion-icon>
-                                </td>
-                            </tr>
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">Soluções XYZ Ltda</td>
-                                <td class="p-4">11.222.333/0001-11</td>
-                                <td class="p-4">Carlos Souza</td>
-                                <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">Inativa</span></td>
-                                <td class="p-4 flex gap-4 text-gray-500">
-                                    <ion-icon name="eye-outline" class="text-lg cursor-pointer hover:text-orange-600" title="Ver Detalhes"></ion-icon>
-                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600" title="Editar"></ion-icon>
-                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600" title="Excluir"></ion-icon>
-                                </td>
-                            </tr>
-                            <tr class="hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">Tech Inovações</td>
-                                <td class="p-4">22.333.444/0001-22</td>
-                                <td class="p-4">Pedro Martins</td>
-                                <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Potencial Cliente</span></td>
-                                <td class="p-4 flex gap-4 text-gray-500">
-                                    <ion-icon name="eye-outline" class="text-lg cursor-pointer hover:text-orange-600" title="Ver Detalhes"></ion-icon>
-                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600" title="Editar"></ion-icon>
-                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600" title="Excluir"></ion-icon>
-                                </td>
-                            </tr>
+                        <tbody id="companies-table-body">
+                            <!-- Linhas serão inseridas pelo JavaScript -->
+                            <tr><td colspan="6" class="text-center p-8">Carregando dados...</td></tr>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Paginação -->
+                <div class="flex justify-between items-center mt-6">
+                    <span id="pagination-info" class="text-sm text-gray-600">Mostrando 0-0 de 0 empresas</span>
+                    <div class="flex gap-2">
+                        <button id="prev-page-button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border rounded-lg hover:bg-gray-100 disabled:opacity-50" disabled>Anterior</button>
+                        <button id="next-page-button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border rounded-lg hover:bg-gray-100 disabled:opacity-50" disabled>Próximo</button>
+                    </div>
                 </div>
             </main>
         </div>
     </div>
 
+    <!-- Modal para Adicionar/Editar Empresa -->
+    <div id="company-modal-backdrop" class="modal-backdrop"></div>
+    <div id="company-modal" class="modal bg-white rounded-lg shadow-xl w-full max-w-lg">
+        <div class="p-6 border-b">
+            <h3 class="text-xl font-semibold text-gray-800" id="modal-title">Adicionar Nova Empresa</h3>
+        </div>
+        <form id="company-form" class="p-6">
+            <input type="hidden" id="company-id">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="col-span-2">
+                    <label for="cnpj" class="block mb-2 text-sm font-medium text-gray-600">CNPJ</label>
+                    <input type="text" id="cnpj" class="w-full px-3 py-2 border rounded-lg" required>
+                    <p id="cnpj-error" class="text-red-500 text-xs mt-1 hidden"></p>
+                </div>
+                <div class="col-span-2">
+                    <label for="nome" class="block mb-2 text-sm font-medium text-gray-600">Nome da Empresa</label>
+                    <input type="text" id="nome" class="w-full px-3 py-2 border rounded-lg" required>
+                </div>
+                 <div>
+                    <label for="contato" class="block mb-2 text-sm font-medium text-gray-600">Contato Principal</label>
+                    <input type="text" id="contato" class="w-full px-3 py-2 border rounded-lg" required>
+                </div>
+                 <div>
+                    <label for="telefone" class="block mb-2 text-sm font-medium text-gray-600">Telefone</label>
+                    <input type="text" id="telefone" class="w-full px-3 py-2 border rounded-lg" required>
+                     <p id="telefone-error" class="text-red-500 text-xs mt-1 hidden"></p>
+                </div>
+                 <div class="col-span-2">
+                    <label for="email" class="block mb-2 text-sm font-medium text-gray-600">E-mail</label>
+                    <input type="email" id="email" class="w-full px-3 py-2 border rounded-lg" required>
+                    <p id="email-error" class="text-red-500 text-xs mt-1 hidden"></p>
+                </div>
+                <div>
+                    <label for="cidade" class="block mb-2 text-sm font-medium text-gray-600">Cidade</label>
+                    <input type="text" id="cidade" class="w-full px-3 py-2 border rounded-lg" required>
+                </div>
+                <div>
+                    <label for="modal-status" class="block mb-2 text-sm font-medium text-gray-600">Status</label>
+                    <select id="modal-status" class="w-full px-3 py-2 border rounded-lg" required>
+                        <option value="Ativa">Ativa</option>
+                        <option value="Inativa">Inativa</option>
+                        <option value="Potencial Cliente">Potencial Cliente</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end gap-4">
+                <button type="button" id="cancel-modal-button" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">Salvar</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        // Importa as funções do Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // ====================================================================================
+        // COLE AQUI A CONFIGURAÇÃO DO SEU FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyDJEFwpP0GuuBugz4KFgzwdJTlhXS3H7w8",
+            authDomain: "confyn-47447.firebaseapp.com",
+            projectId: "confyn-47447",
+            storageBucket: "confyn-47447.firebasestorage.app",
+            messagingSenderId: "292650745185",
+            appId: "1:292650745185:web:2e1555246eb1b14c115920"
+        };
+        // ====================================================================================
+
+        // Inicializa o Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- AUTENTICAÇÃO E SEGURANÇA ---
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                // Usuário está logado, busca e exibe as empresas
+                console.log("Usuário logado:", user.email);
+                const userName = user.email.split('@')[0];
+                const userInitials = userName.substring(0, 2).toUpperCase();
+                document.getElementById('user-name').textContent = userName;
+                document.getElementById('user-initials').textContent = userInitials;
+                fetchCompanies();
+            } else {
+                // Usuário não está logado, redireciona para a página de login
+                console.log("Nenhum usuário logado. Redirecionando...");
+                window.location.href = 'index.html';
+            }
+        });
+        
+        document.getElementById('logout-button').addEventListener('click', () => {
+            signOut(auth).then(() => {
+                console.log("Logout bem-sucedido.");
+                window.location.href = 'index.html';
+            }).catch(error => {
+                console.error("Erro no logout:", error);
+            });
+        });
+
+        // --- VARIÁVEIS GLOBAIS ---
+        let allCompanies = [];
+        let filteredCompanies = [];
+        let currentPage = 1;
+        const itemsPerPage = 5;
+
+        // --- LÓGICA DO MODAL ---
+        const modal = document.getElementById('company-modal');
+        const modalBackdrop = document.getElementById('company-modal-backdrop');
+        const companyForm = document.getElementById('company-form');
+
+        const openModal = (company = null) => {
+            companyForm.reset();
+            document.getElementById('company-id').value = '';
+            // Resetar mensagens de erro
+            document.getElementById('cnpj-error').classList.add('hidden');
+            document.getElementById('email-error').classList.add('hidden');
+            document.getElementById('telefone-error').classList.add('hidden');
+            
+            if (company) {
+                // Modo Edição
+                document.getElementById('modal-title').textContent = 'Editar Empresa';
+                document.getElementById('company-id').value = company.id;
+                document.getElementById('cnpj').value = company.cnpj;
+                document.getElementById('nome').value = company.nome;
+                document.getElementById('contato').value = company.contato;
+                document.getElementById('telefone').value = company.telefone;
+                document.getElementById('email').value = company.email;
+                document.getElementById('cidade').value = company.cidade;
+                document.getElementById('modal-status').value = company.status;
+            } else {
+                // Modo Adição
+                document.getElementById('modal-title').textContent = 'Adicionar Nova Empresa';
+            }
+            modal.style.display = 'block';
+            modalBackdrop.style.display = 'block';
+        };
+
+        const closeModal = () => {
+            modal.style.display = 'none';
+            modalBackdrop.style.display = 'none';
+        };
+
+        document.getElementById('add-company-button').addEventListener('click', () => openModal());
+        document.getElementById('cancel-modal-button').addEventListener('click', closeModal);
+        modalBackdrop.addEventListener('click', closeModal);
+
+        // --- VALIDAÇÕES ---
+        async function checkUniqueness(field, value, currentId = null) {
+            const q = query(collection(db, "empresas"), where(field, "==", value));
+            const querySnapshot = await getDocs(q);
+            if (querySnapshot.empty) return true;
+            if (currentId && querySnapshot.docs[0].id === currentId) return true;
+            return false;
+        }
+
+        function validateCNPJ(cnpj) {
+            cnpj = cnpj.replace(/[^\d]+/g,'');
+            if(cnpj == '' || cnpj.length != 14) return false;
+            // Validação simples de formato, pode ser substituída por uma mais complexa
+            return true; 
+        }
+
+        // --- CRUD (CREATE, READ, UPDATE, DELETE) ---
+        async function fetchCompanies() {
+            try {
+                const q = query(collection(db, "empresas"), orderBy("nome"));
+                const querySnapshot = await getDocs(q);
+                allCompanies = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                updateFiltersAndDisplay();
+                updateStats();
+                populateCityFilter();
+            } catch (error) {
+                console.error("Erro ao buscar empresas: ", error);
+                document.getElementById('companies-table-body').innerHTML = `<tr><td colspan="6" class="text-center p-8 text-red-500">Erro ao carregar dados.</td></tr>`;
+            }
+        }
+
+        companyForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const companyId = document.getElementById('company-id').value;
+            
+            const companyData = {
+                cnpj: document.getElementById('cnpj').value,
+                nome: document.getElementById('nome').value,
+                contato: document.getElementById('contato').value,
+                telefone: document.getElementById('telefone').value,
+                email: document.getElementById('email').value,
+                cidade: document.getElementById('cidade').value,
+                status: document.getElementById('modal-status').value,
+            };
+
+            // Validações
+            if (!validateCNPJ(companyData.cnpj)) {
+                document.getElementById('cnpj-error').textContent = 'CNPJ inválido.';
+                document.getElementById('cnpj-error').classList.remove('hidden');
+                return;
+            } else {
+                 document.getElementById('cnpj-error').classList.add('hidden');
+            }
+
+            const isCnpjUnique = await checkUniqueness('cnpj', companyData.cnpj, companyId);
+            if (!isCnpjUnique) {
+                 document.getElementById('cnpj-error').textContent = 'CNPJ já cadastrado.';
+                 document.getElementById('cnpj-error').classList.remove('hidden');
+                return;
+            }
+
+            const isEmailUnique = await checkUniqueness('email', companyData.email, companyId);
+            if (!isEmailUnique) {
+                 document.getElementById('email-error').textContent = 'E-mail já cadastrado.';
+                 document.getElementById('email-error').classList.remove('hidden');
+                return;
+            } else {
+                 document.getElementById('email-error').classList.add('hidden');
+            }
+
+            const isTelefoneUnique = await checkUniqueness('telefone', companyData.telefone, companyId);
+            if (!isTelefoneUnique) {
+                 document.getElementById('telefone-error').textContent = 'Telefone já cadastrado.';
+                 document.getElementById('telefone-error').classList.remove('hidden');
+                return;
+            } else {
+                 document.getElementById('telefone-error').classList.add('hidden');
+            }
+
+            try {
+                if (companyId) {
+                    // Atualizar
+                    const companyRef = doc(db, "empresas", companyId);
+                    await updateDoc(companyRef, companyData);
+                    console.log("Empresa atualizada com ID: ", companyId);
+                } else {
+                    // Adicionar
+                    const docRef = await addDoc(collection(db, "empresas"), companyData);
+                    console.log("Empresa adicionada com ID: ", docRef.id);
+                }
+                closeModal();
+                fetchCompanies();
+            } catch (error) {
+                console.error("Erro ao salvar empresa: ", error);
+            }
+        });
+
+        window.editCompany = (id) => {
+            const company = allCompanies.find(c => c.id === id);
+            if(company) openModal(company);
+        };
+        
+        window.deleteCompany = async (id) => {
+            if (confirm('Tem certeza que deseja excluir esta empresa?')) {
+                try {
+                    await deleteDoc(doc(db, "empresas", id));
+                    console.log("Empresa excluída com ID: ", id);
+                    fetchCompanies();
+                } catch (error) {
+                    console.error("Erro ao excluir empresa: ", error);
+                }
+            }
+        };
+
+        // --- FILTROS, PESQUISA E PAGINAÇÃO ---
+        function applyFiltersAndSearch() {
+            const status = document.getElementById('status-filter').value;
+            const city = document.getElementById('city-filter').value;
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            
+            filteredCompanies = allCompanies.filter(company => {
+                const statusMatch = status === 'Todos' || company.status === status;
+                const cityMatch = city === 'Todas' || company.cidade === city;
+                const searchMatch = !searchTerm ||
+                    company.nome.toLowerCase().includes(searchTerm) ||
+                    company.cnpj.toLowerCase().includes(searchTerm) ||
+                    company.email.toLowerCase().includes(searchTerm) ||
+                    company.telefone.toLowerCase().includes(searchTerm);
+                
+                return statusMatch && cityMatch && searchMatch;
+            });
+            currentPage = 1;
+        }
+
+        function displayCompanies() {
+            const tableBody = document.getElementById('companies-table-body');
+            tableBody.innerHTML = '';
+
+            if (filteredCompanies.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="6" class="text-center p-8">Nenhuma empresa encontrada.</td></tr>`;
+                updatePaginationControls();
+                return;
+            }
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedItems = filteredCompanies.slice(startIndex, endIndex);
+
+            paginatedItems.forEach(company => {
+                let statusClass = '';
+                switch(company.status) {
+                    case 'Ativa': statusClass = 'bg-green-100 text-green-800'; break;
+                    case 'Inativa': statusClass = 'bg-gray-100 text-gray-800'; break;
+                    case 'Potencial Cliente': statusClass = 'bg-blue-100 text-blue-800'; break;
+                }
+
+                const row = `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-4 font-medium text-gray-900">${company.nome}</td>
+                        <td class="p-4">${company.cnpj}</td>
+                        <td class="p-4">${company.contato}</td>
+                        <td class="p-4">${company.cidade}</td>
+                        <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full ${statusClass}">${company.status}</span></td>
+                        <td class="p-4 flex gap-4 text-gray-500">
+                            <ion-icon onclick="editCompany('${company.id}')" name="create-outline" class="text-lg cursor-pointer hover:text-blue-600" title="Editar"></ion-icon>
+                            <ion-icon onclick="deleteCompany('${company.id}')" name="trash-outline" class="text-lg cursor-pointer hover:text-red-600" title="Excluir"></ion-icon>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+
+            updatePaginationControls();
+        }
+        
+        function updatePaginationControls() {
+            const totalPages = Math.ceil(filteredCompanies.length / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage + 1;
+            const endIndex = Math.min(startIndex + itemsPerPage - 1, filteredCompanies.length);
+            
+            document.getElementById('pagination-info').textContent = `Mostrando ${filteredCompanies.length > 0 ? startIndex : 0}-${endIndex} de ${filteredCompanies.length} empresas`;
+            document.getElementById('prev-page-button').disabled = currentPage === 1;
+            document.getElementById('next-page-button').disabled = currentPage === totalPages || totalPages === 0;
+        }
+
+        function updateFiltersAndDisplay() {
+            applyFiltersAndSearch();
+            displayCompanies();
+        }
+        
+        document.getElementById('apply-filters-button').addEventListener('click', updateFiltersAndDisplay);
+        document.getElementById('clear-filters-button').addEventListener('click', () => {
+            document.getElementById('status-filter').value = 'Todos';
+            document.getElementById('city-filter').value = 'Todas';
+            document.getElementById('search-input').value = '';
+            updateFiltersAndDisplay();
+        });
+        document.getElementById('search-input').addEventListener('input', updateFiltersAndDisplay);
+        document.getElementById('prev-page-button').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                displayCompanies();
+            }
+        });
+        document.getElementById('next-page-button').addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredCompanies.length / itemsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                displayCompanies();
+            }
+        });
+
+        function populateCityFilter() {
+            const cityFilter = document.getElementById('city-filter');
+            const cities = [...new Set(allCompanies.map(c => c.cidade))].sort();
+            
+            // Preserva a opção "Todas"
+            cityFilter.innerHTML = '<option value="Todas">Todas</option>'; 
+            
+            cities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city;
+                option.textContent = city;
+                cityFilter.appendChild(option);
+            });
+        }
+        
+        function updateStats() {
+            document.getElementById('total-clientes').textContent = allCompanies.length;
+            document.getElementById('clientes-ativos').textContent = allCompanies.filter(c => c.status === 'Ativa').length;
+            document.getElementById('clientes-inativos').textContent = allCompanies.filter(c => c.status === 'Inativa').length;
+            document.getElementById('potenciais-clientes').textContent = allCompanies.filter(c => c.status === 'Potencial Cliente').length;
+        }
+        
+        // --- GERAÇÃO DE PDF ---
+        document.getElementById('download-report-button').addEventListener('click', () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Cabeçalho
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(20);
+            doc.setTextColor('#2c3e50'); // Azul escuro
+            doc.text("Relatório de Empresas - CONFYN", 14, 22);
+            
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            const statusFilter = document.getElementById('status-filter').value;
+            const cityFilter = document.getElementById('city-filter').value;
+            doc.text(`Filtros Aplicados: Status (${statusFilter}), Cidade (${cityFilter})`, 14, 30);
+            const date = new Date().toLocaleDateString('pt-BR');
+            doc.text(`Gerado em: ${date}`, 14, 35);
+
+            // Tabela
+            const tableData = filteredCompanies.map(c => [
+                c.nome, c.cnpj, c.contato, c.cidade, c.status
+            ]);
+
+            doc.autoTable({
+                startY: 45,
+                head: [['Nome da Empresa', 'CNPJ', 'Contato', 'Cidade', 'Status']],
+                body: tableData,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: '#f97316' // Laranja CONFYN
+                },
+                styles: {
+                    font: 'helvetica',
+                    fontSize: 9,
+                },
+                didDrawPage: function (data) {
+                    // Rodapé
+                    doc.setFontSize(8);
+                    doc.text('Página ' + doc.internal.getNumberOfPages(), data.settings.margin.left, doc.internal.pageSize.height - 10);
+                }
+            });
+
+            doc.save('Relatorio_Empresas_CONFYN.pdf');
+        });
+
+    </script>
 </body>
 </html>
-
 
