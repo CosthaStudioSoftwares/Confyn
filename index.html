@@ -73,7 +73,7 @@
             apiKey: "AIzaSyDJEFwpP0GuuBugz4KFgzwdJTlhXS3H7w8",
             authDomain: "confyn-47447.firebaseapp.com",
             projectId: "confyn-47447",
-            storageBucket: "confyn-47447.firebasestorage.app",
+            storageBucket: "confyn-47447.appspot.com",
             messagingSenderId: "292650745185",
             appId: "1:292650745185:web:2e1555246eb1b14c115920"
         };
@@ -100,9 +100,9 @@
 
             signInWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
-                    // Login bem-sucedido, redireciona para a página principal
+                    // Login bem-sucedido, redireciona para o Dashboard
                     console.log('Login realizado com sucesso!', userCredential.user);
-                    window.location.href = 'empresas.html';
+                    window.location.href = 'dashboard.html';
                 })
                 .catch((error) => {
                     // Ocorreu um erro
@@ -115,5 +115,4 @@
 
 </body>
 </html>
-
 
