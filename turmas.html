@@ -16,25 +16,38 @@
     <!-- Ionicons CDN -->
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+    <!-- PDF Generation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
     
     <style>
-        body { 
-            font-family: 'Inter', sans-serif; 
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 40;
         }
-        /* Custom scrollbar for better aesthetics */
-        ::-webkit-scrollbar {
-            width: 8px;
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 50;
         }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #d1d5db;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #9ca3af;
-        }
+        /* Custom styles for nested modal */
+        #aluno-modal-backdrop { z-index: 60; }
+        #aluno-modal { z-index: 70; }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -42,53 +55,45 @@
     <div class="flex h-screen bg-gray-100">
         <!-- Barra de Navegação Lateral -->
         <aside class="w-64 flex-shrink-0 bg-slate-900 text-gray-300 flex flex-col transition-all duration-300">
-            <!-- Logo -->
-            <div class="h-20 flex items-center justify-center px-4 border-b border-slate-800">
-                 <div class="flex items-center gap-3">
-                    <ion-icon name="shield-checkmark-outline" class="text-3xl text-orange-500"></ion-icon>
-                    <span class="text-white text-2xl font-bold">CONFYN</span>
-                </div>
-            </div>
+             <!-- Logo -->
+             <div class="h-20 flex items-center justify-center px-4 border-b border-slate-800">
+                <div class="flex items-center gap-3">
+                   <ion-icon name="shield-checkmark-outline" class="text-3xl text-orange-500"></ion-icon>
+                   <span class="text-white text-2xl font-bold">CONFYN</span>
+               </div>
+           </div>
 
-            <!-- Menu -->
-            <nav class="flex-1 px-4 py-6 space-y-2">
-                <a href="dashboard.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
-                    <ion-icon name="grid-outline" class="text-xl"></ion-icon>
-                    <span class="ml-4">Dashboard</span>
-                </a>
-                <a href="empresas.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
-                    <ion-icon name="business-outline" class="text-xl"></ion-icon>
-                    <span class="ml-4">Empresas</span>
-                </a>
-                <a href="turmas.html" class="flex items-center px-4 py-2.5 rounded-lg bg-orange-600 text-white font-semibold shadow-md">
-                    <ion-icon name="people-outline" class="text-xl"></ion-icon>
-                    <span class="ml-4">Alunos/Turmas</span>
-                </a>
-                <a href="financeiro.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
-                    <ion-icon name="cash-outline" class="text-xl"></ion-icon>
-                    <span class="ml-4">Financeiro</span>
-                </a>
-                <a href="colaboradores.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
-                    <ion-icon name="id-card-outline" class="text-xl"></ion-icon>
-                    <span class="ml-4">Colaboradores</span>
-                </a>
-                <a href="estoque.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
-                    <ion-icon name="cube-outline" class="text-xl"></ion-icon>
-                    <span class="ml-4">Estoque</span>
-                </a>
-                <a href="administrativo.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
-                    <ion-icon name="settings-outline" class="text-xl"></ion-icon>
-                    <span class="ml-4">Administrativo</span>
-                </a>
-            </nav>
-
-            <!-- Rodapé da Sidebar -->
-            <div class="p-4 border-t border-slate-800">
-                <a href="#" class="flex items-center text-sm">
-                    <ion-icon name="chevron-back-outline" class="text-xl"></ion-icon>
-                    <span class="ml-2">Recolher Menu</span>
-                </a>
-            </div>
+           <!-- Menu -->
+           <nav class="flex-1 px-4 py-6 space-y-2">
+               <a href="dashboard.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
+                   <ion-icon name="grid-outline" class="text-xl"></ion-icon>
+                   <span class="ml-4">Dashboard</span>
+               </a>
+               <a href="empresas.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
+                   <ion-icon name="business-outline" class="text-xl"></ion-icon>
+                   <span class="ml-4">Empresas</span>
+               </a>
+               <a href="turmas.html" class="flex items-center px-4 py-2.5 rounded-lg bg-orange-600 text-white font-semibold shadow-md">
+                   <ion-icon name="people-outline" class="text-xl"></ion-icon>
+                   <span class="ml-4">Alunos/Turmas</span>
+               </a>
+               <a href="financeiro.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
+                   <ion-icon name="cash-outline" class="text-xl"></ion-icon>
+                   <span class="ml-4">Financeiro</span>
+               </a>
+               <a href="colaboradores.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
+                   <ion-icon name="id-card-outline" class="text-xl"></ion-icon>
+                   <span class="ml-4">Colaboradores</span>
+               </a>
+               <a href="estoque.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
+                   <ion-icon name="cube-outline" class="text-xl"></ion-icon>
+                   <span class="ml-4">Estoque</span>
+               </a>
+               <a href="administrativo.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
+                   <ion-icon name="settings-outline" class="text-xl"></ion-icon>
+                   <span class="ml-4">Administrativo</span>
+               </a>
+           </nav>
         </aside>
 
         <!-- Conteúdo Principal -->
@@ -96,20 +101,20 @@
             <!-- Cabeçalho Superior -->
             <header class="h-20 bg-white border-b flex items-center justify-between px-8">
                 <div>
-                    <h1 class="text-xl font-bold text-gray-800">Alunos/Turmas</h1>
+                    <h1 class="text-xl font-bold text-gray-800">Alunos e Turmas</h1>
                     <p class="text-sm text-gray-500">Dashboard / Alunos e Turmas</p>
                 </div>
                 <div class="flex items-center gap-6">
                     <div class="relative">
                         <ion-icon name="search-outline" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></ion-icon>
-                        <input type="text" placeholder="Busca rápida..." class="pl-10 pr-4 py-2 w-64 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        <input type="text" id="search-input" placeholder="Pesquisar por curso, empresa, aluno..." class="pl-10 pr-4 py-2 w-64 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
                     </div>
                     <ion-icon name="notifications-outline" class="text-2xl text-gray-600 cursor-pointer"></ion-icon>
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-slate-300 flex items-center justify-center font-bold text-slate-600">UN</div>
+                        <div class="w-10 h-10 rounded-full bg-slate-300 flex items-center justify-center font-bold text-slate-600" id="user-initials">UN</div>
                         <div>
-                            <p class="font-semibold text-sm">Usuário Admin</p>
-                            <a href="index.html" class="text-xs text-orange-600 hover:underline">Sair</a>
+                            <p class="font-semibold text-sm" id="user-name">Usuário</p>
+                            <a href="#" id="logout-button" class="text-xs text-orange-600 hover:underline">Sair</a>
                         </div>
                     </div>
                 </div>
@@ -117,33 +122,40 @@
 
             <!-- Área de Conteúdo -->
             <main class="flex-1 p-8 overflow-y-auto">
-                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-semibold text-gray-700">Agenda de Treinamentos</h2>
-                    <button class="flex items-center gap-2 bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 transition-colors">
-                        <ion-icon name="add-outline" class="text-xl"></ion-icon>
-                        <span>Agendar Nova Turma</span>
-                    </button>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-semibold text-gray-700">Listagem de Turmas</h2>
+                    <div class="flex gap-4">
+                        <button id="download-report-button" class="flex items-center gap-2 bg-green-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-green-600 transition-colors">
+                            <ion-icon name="download-outline" class="text-xl"></ion-icon>
+                            <span>Baixar Relatório</span>
+                        </button>
+                        <button id="add-turma-button" class="flex items-center gap-2 bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 transition-colors">
+                            <ion-icon name="add-outline" class="text-xl"></ion-icon>
+                            <span>Adicionar Turma</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Filtros -->
                 <div class="bg-white p-4 rounded-lg shadow-sm mb-6 flex items-center gap-4">
-                    <div class="flex items-center gap-2">
-                        <label for="status-filter" class="text-sm font-medium text-gray-700">Status:</label>
+                     <div class="flex items-center gap-2">
+                        <label class="text-sm font-medium text-gray-700">Status:</label>
                         <select id="status-filter" class="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
-                            <option>Todos</option>
-                            <option>Agendada</option>
-                            <option>Concluída</option>
-                            <option>Cancelada</option>
+                            <option value="Todos">Todos</option>
+                            <option value="Agendada">Agendada</option>
+                            <option value="Em Andamento">Em Andamento</option>
+                            <option value="Concluída">Concluída</option>
+                            <option value="Cancelada">Cancelada</option>
                         </select>
                     </div>
                     <div class="flex items-center gap-2">
-                        <label for="date-filter" class="text-sm font-medium text-gray-700">Período:</label>
-                        <input type="date" id="date-start" class="border rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        <label class="text-sm font-medium text-gray-700">Período:</label>
+                        <input type="date" id="start-date-filter" class="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
                         <span class="text-gray-500">até</span>
-                        <input type="date" id="date-end" class="border rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        <input type="date" id="end-date-filter" class="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
                     </div>
-                    <button class="bg-slate-800 text-white font-semibold py-1.5 px-4 rounded-lg hover:bg-slate-700 transition-colors text-sm">Aplicar</button>
-                    <button class="text-gray-600 hover:text-gray-800 font-medium text-sm">Limpar</button>
+                    <button id="apply-filters-button" class="bg-slate-800 text-white font-semibold py-1.5 px-4 rounded-lg hover:bg-slate-700 transition-colors text-sm">Aplicar</button>
+                    <button id="clear-filters-button" class="text-gray-600 hover:text-gray-800 font-medium text-sm">Limpar</button>
                 </div>
 
                 <!-- Tabela de Turmas -->
@@ -159,47 +171,573 @@
                                 <th class="p-4">Ações</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">Brigada de Incêndio - Nível I</td>
-                                <td class="p-4">Acme Corporation</td>
-                                <td class="p-4">20/09/2025</td>
-                                <td class="p-4 text-center">15</td>
-                                <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Agendada</span></td>
-                                <td class="p-4 flex gap-4 text-gray-500">
-                                    <ion-icon name="eye-outline" class="text-lg cursor-pointer hover:text-orange-600" title="Ver Detalhes"></ion-icon>
-                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600" title="Editar"></ion-icon>
-                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600" title="Cancelar"></ion-icon>
-                                </td>
-                            </tr>
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">NR-35 - Trabalho em Altura</td>
-                                <td class="p-4">Soluções XYZ Ltda</td>
-                                <td class="p-4">15/08/2025</td>
-                                <td class="p-4 text-center">8</td>
-                                <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Concluída</span></td>
-                                <td class="p-4 flex gap-4 text-gray-500">
-                                    <ion-icon name="eye-outline" class="text-lg cursor-pointer hover:text-orange-600" title="Ver Detalhes"></ion-icon>
-                                    <ion-icon name="document-text-outline" class="text-lg cursor-pointer hover:text-green-600" title="Emitir Certificados"></ion-icon>
-                                </td>
-                            </tr>
-                             <tr class="border-b hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">Primeiros Socorros</td>
-                                <td class="p-4">Tech Inovações</td>
-                                <td class="p-4">01/08/2025</td>
-                                <td class="p-4 text-center">12</td>
-                                <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Cancelada</span></td>
-                                <td class="p-4 flex gap-4 text-gray-500">
-                                    <ion-icon name="eye-outline" class="text-lg cursor-pointer hover:text-orange-600" title="Ver Detalhes"></ion-icon>
-                                </td>
-                            </tr>
+                        <tbody id="turmas-table-body">
+                            <tr><td colspan="6" class="text-center p-8">Carregando dados...</td></tr>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Paginação -->
+                 <div class="flex justify-between items-center mt-6">
+                    <span id="pagination-info" class="text-sm text-gray-600">Mostrando 0-0 de 0 turmas</span>
+                    <div class="flex gap-2">
+                        <button id="prev-page-button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border rounded-lg hover:bg-gray-100 disabled:opacity-50" disabled>Anterior</button>
+                        <button id="next-page-button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border rounded-lg hover:bg-gray-100 disabled:opacity-50" disabled>Próximo</button>
+                    </div>
                 </div>
             </main>
         </div>
     </div>
 
+    <!-- Modal para Adicionar/Editar Turma -->
+    <div id="turma-modal-backdrop" class="modal-backdrop"></div>
+    <div id="turma-modal" class="modal bg-white rounded-lg shadow-xl w-full max-w-4xl">
+        <div class="p-6 border-b flex justify-between items-center">
+            <h3 class="text-xl font-semibold text-gray-800" id="turma-modal-title">Adicionar Nova Turma</h3>
+            <button id="close-turma-modal-button" class="text-gray-500 hover:text-gray-800">&times;</button>
+        </div>
+        <form id="turma-form" class="p-6 max-h-[80vh] overflow-y-auto">
+            <input type="hidden" id="turma-id">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Coluna Esquerda: Dados da Turma -->
+                <div class="space-y-4">
+                    <div>
+                        <label for="curso-nome" class="block mb-2 text-sm font-medium text-gray-600">Curso</label>
+                        <select id="curso-nome" class="w-full px-3 py-2 border rounded-lg" required></select>
+                    </div>
+                     <div>
+                        <label for="empresa-select" class="block mb-2 text-sm font-medium text-gray-600">Empresa</label>
+                        <select id="empresa-select" class="w-full px-3 py-2 border rounded-lg" required></select>
+                    </div>
+                    <div>
+                        <label for="turma-data" class="block mb-2 text-sm font-medium text-gray-600">Data do Treinamento</label>
+                        <input type="date" id="turma-data" class="w-full px-3 py-2 border rounded-lg" required>
+                    </div>
+                    <div>
+                        <label for="turma-status" class="block mb-2 text-sm font-medium text-gray-600">Status</label>
+                        <select id="turma-status" class="w-full px-3 py-2 border rounded-lg" required>
+                            <option value="Agendada">Agendada</option>
+                            <option value="Em Andamento">Em Andamento</option>
+                            <option value="Concluída">Concluída</option>
+                            <option value="Cancelada">Cancelada</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Coluna Direita: Alunos -->
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h4 class="text-lg font-semibold text-gray-700">Alunos Inscritos</h4>
+                        <button type="button" id="add-aluno-button" class="text-sm bg-blue-500 text-white font-semibold py-1 px-3 rounded-lg hover:bg-blue-600">Adicionar Aluno</button>
+                    </div>
+                    <div id="alunos-list" class="space-y-2 max-h-64 overflow-y-auto p-2 border rounded-lg bg-gray-50">
+                        <!-- Lista de alunos será inserida aqui -->
+                        <p class="text-center text-gray-500 text-sm">Nenhum aluno adicionado.</p>
+                    </div>
+                </div>
+            </div>
+             <div class="mt-8 flex justify-end gap-4 border-t pt-6">
+                <button type="button" id="cancel-turma-modal-button" class="px-6 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Cancelar</button>
+                <button type="submit" class="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">Salvar Turma</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Modal para Adicionar/Editar Aluno (Aninhado) -->
+    <div id="aluno-modal-backdrop" class="modal-backdrop"></div>
+    <div id="aluno-modal" class="modal bg-white rounded-lg shadow-xl w-full max-w-2xl">
+         <div class="p-6 border-b">
+            <h3 class="text-xl font-semibold text-gray-800" id="aluno-modal-title">Adicionar Novo Aluno</h3>
+        </div>
+        <form id="aluno-form" class="p-6 max-h-[70vh] overflow-y-auto">
+            <input type="hidden" id="aluno-id">
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="col-span-2">
+                    <label for="aluno-nome" class="block text-sm font-medium text-gray-700">Nome Completo</label>
+                    <input type="text" id="aluno-nome" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                </div>
+                 <div>
+                    <label for="aluno-cpf" class="block text-sm font-medium text-gray-700">CPF</label>
+                    <input type="text" id="aluno-cpf" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" placeholder="000.000.000-00" required>
+                </div>
+                <div>
+                    <label for="aluno-rg" class="block text-sm font-medium text-gray-700">RG</label>
+                    <input type="text" id="aluno-rg" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                </div>
+                 <div>
+                    <label for="aluno-nascimento" class="block text-sm font-medium text-gray-700">Data de Nascimento</label>
+                    <input type="date" id="aluno-nascimento" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                </div>
+                <div>
+                    <label for="aluno-telefone" class="block text-sm font-medium text-gray-700">Telefone</label>
+                    <input type="text" id="aluno-telefone" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" placeholder="(XX) XXXXX-XXXX" required>
+                </div>
+                <div class="col-span-2">
+                    <label for="aluno-cep" class="block text-sm font-medium text-gray-700">CEP</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="aluno-cep" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                        <button type="button" id="buscar-cep-button" class="mt-1 px-3 py-1 bg-gray-200 rounded-md text-sm">Buscar</button>
+                    </div>
+                </div>
+                <div class="col-span-2">
+                    <label for="aluno-rua" class="block text-sm font-medium text-gray-700">Rua</label>
+                    <input type="text" id="aluno-rua" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100" readonly>
+                </div>
+                <div>
+                    <label for="aluno-numero" class="block text-sm font-medium text-gray-700">Número</label>
+                    <input type="text" id="aluno-numero" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                </div>
+                <div>
+                    <label for="aluno-bairro" class="block text-sm font-medium text-gray-700">Bairro</label>
+                    <input type="text" id="aluno-bairro" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100" readonly>
+                </div>
+                 <div>
+                    <label for="aluno-cidade" class="block text-sm font-medium text-gray-700">Cidade</label>
+                    <input type="text" id="aluno-cidade" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100" readonly>
+                </div>
+                 <div>
+                    <label for="aluno-uf" class="block text-sm font-medium text-gray-700">UF</label>
+                    <input type="text" id="aluno-uf" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100" readonly>
+                </div>
+                <div class="col-span-2">
+                    <label for="aluno-documento" class="block text-sm font-medium text-gray-700">Documento (Opcional - PDF ou Imagem)</label>
+                    <input type="file" id="aluno-documento" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100">
+                    <p id="upload-status" class="text-xs mt-1 text-gray-500"></p>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end gap-4">
+                <button type="button" id="cancel-aluno-modal-button" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Salvar Aluno</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc, query, orderBy, where, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+        // ====================================================================================
+        // COLE AQUI A CONFIGURAÇÃO DO SEU FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyDJEFwpP0GuuBugz4KFgzwdJTlhXS3H7w8",
+            authDomain: "confyn-47447.firebaseapp.com",
+            projectId: "confyn-47447",
+            storageBucket: "confyn-47447.firebasestorage.app",
+            messagingSenderId: "292650745185",
+            appId: "1:292650745185:web:2e1555246eb1b14c115920"
+           };
+        // ====================================================================================
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // --- AUTH & SECURITY ---
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                const userName = user.email.split('@')[0];
+                document.getElementById('user-name').textContent = userName;
+                document.getElementById('user-initials').textContent = userName.substring(0, 2).toUpperCase();
+                loadInitialData();
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+
+        document.getElementById('logout-button').addEventListener('click', () => signOut(auth));
+
+        // --- GLOBAL STATE ---
+        let allTurmas = [];
+        let filteredTurmas = [];
+        let allCompanies = [];
+        let tempAlunosList = [];
+        let currentPage = 1;
+        const itemsPerPage = 5;
+
+        const cursosDisponiveis = [
+            "NR-35 - Trabalho em Altura", "NR-33 - Espaços Confinados", "NR-10 - Básico",
+            "Brigada de Incêndio - Nível Básico", "Brigada de Incêndio - Nível Intermediário",
+            "Primeiros Socorros", "Socorrista", "APH - Atendimento Pré-Hospitalar"
+        ];
+        
+        // --- INITIAL DATA LOADING ---
+        async function loadInitialData() {
+            await fetchCompanies();
+            await fetchTurmas();
+            populateCursosFilter();
+            populateEmpresasFilter();
+        }
+
+        async function fetchCompanies() {
+            try {
+                const querySnapshot = await getDocs(collection(db, "empresas"));
+                allCompanies = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            } catch (error) {
+                console.error("Erro ao buscar empresas: ", error);
+            }
+        }
+
+        async function fetchTurmas() {
+            try {
+                const q = query(collection(db, "turmas"), orderBy("data", "desc"));
+                const querySnapshot = await getDocs(q);
+                allTurmas = querySnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    // Converte Timestamp do Firebase para Date do JS
+                    const jsDate = data.data ? data.data.toDate() : null;
+                    return { id: doc.id, ...data, data: jsDate };
+                });
+                applyFiltersAndSearch();
+            } catch (error) {
+                console.error("Erro ao buscar turmas: ", error);
+            }
+        }
+
+        // --- MODAL TURMA ---
+        const turmaModal = document.getElementById('turma-modal');
+        const turmaModalBackdrop = document.getElementById('turma-modal-backdrop');
+
+        const openTurmaModal = (turma = null) => {
+            document.getElementById('turma-form').reset();
+            document.getElementById('turma-id').value = '';
+            tempAlunosList = [];
+
+            if (turma) {
+                document.getElementById('turma-modal-title').textContent = 'Editar Turma';
+                document.getElementById('turma-id').value = turma.id;
+                document.getElementById('curso-nome').value = turma.cursoNome;
+                document.getElementById('empresa-select').value = turma.empresaId;
+                document.getElementById('turma-data').valueAsDate = turma.data;
+                document.getElementById('turma-status').value = turma.status;
+                tempAlunosList = turma.alunos || [];
+            } else {
+                document.getElementById('turma-modal-title').textContent = 'Adicionar Nova Turma';
+            }
+            
+            updateAlunosListUI();
+            turmaModal.style.display = 'block';
+            turmaModalBackdrop.style.display = 'block';
+        };
+
+        const closeTurmaModal = () => {
+            turmaModal.style.display = 'none';
+            turmaModalBackdrop.style.display = 'none';
+        };
+
+        document.getElementById('add-turma-button').addEventListener('click', () => openTurmaModal());
+        document.getElementById('close-turma-modal-button').addEventListener('click', closeTurmaModal);
+        document.getElementById('cancel-turma-modal-button').addEventListener('click', closeTurmaModal);
+
+        // --- MODAL ALUNO ---
+        const alunoModal = document.getElementById('aluno-modal');
+        const alunoModalBackdrop = document.getElementById('aluno-modal-backdrop');
+
+        const openAlunoModal = (aluno = null) => {
+            document.getElementById('aluno-form').reset();
+            document.getElementById('aluno-id').value = '';
+            document.getElementById('upload-status').textContent = '';
+
+            if (aluno) {
+                document.getElementById('aluno-modal-title').textContent = 'Editar Aluno';
+                document.getElementById('aluno-id').value = aluno.tempId || aluno.id;
+                Object.keys(aluno).forEach(key => {
+                    const element = document.getElementById(`aluno-${key}`);
+                    if (element) element.value = aluno[key];
+                });
+            } else {
+                document.getElementById('aluno-modal-title').textContent = 'Adicionar Novo Aluno';
+            }
+
+            alunoModal.style.display = 'block';
+            alunoModalBackdrop.style.display = 'block';
+        };
+
+        const closeAlunoModal = () => {
+            alunoModal.style.display = 'none';
+            alunoModalBackdrop.style.display = 'none';
+        };
+
+        document.getElementById('add-aluno-button').addEventListener('click', () => openAlunoModal());
+        document.getElementById('cancel-aluno-modal-button').addEventListener('click', closeAlunoModal);
+
+        // --- FILTERS & DISPLAY ---
+        function applyFiltersAndSearch() {
+            const status = document.getElementById('status-filter').value;
+            const startDate = document.getElementById('start-date-filter').value;
+            const endDate = document.getElementById('end-date-filter').value;
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            
+            filteredTurmas = allTurmas.filter(turma => {
+                const statusMatch = status === 'Todos' || turma.status === status;
+                
+                const dateMatch = (!startDate || turma.data >= new Date(startDate)) && 
+                                  (!endDate || turma.data <= new Date(endDate));
+
+                const searchMatch = !searchTerm ||
+                    turma.cursoNome.toLowerCase().includes(searchTerm) ||
+                    turma.empresaNome.toLowerCase().includes(searchTerm) ||
+                    (turma.alunos && turma.alunos.some(aluno => aluno.nome.toLowerCase().includes(searchTerm)));
+
+                return statusMatch && dateMatch && searchMatch;
+            });
+            currentPage = 1;
+            displayTurmas();
+        }
+
+        function displayTurmas() {
+            const tableBody = document.getElementById('turmas-table-body');
+            tableBody.innerHTML = '';
+
+            if (filteredTurmas.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="6" class="text-center p-8">Nenhuma turma encontrada.</td></tr>`;
+                updatePaginationControls();
+                return;
+            }
+
+            const paginatedItems = filteredTurmas.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+            paginatedItems.forEach(turma => {
+                let statusClass;
+                switch(turma.status) {
+                    case 'Agendada': statusClass = 'bg-blue-100 text-blue-800'; break;
+                    case 'Em Andamento': statusClass = 'bg-yellow-100 text-yellow-800'; break;
+                    case 'Concluída': statusClass = 'bg-green-100 text-green-800'; break;
+                    case 'Cancelada': statusClass = 'bg-red-100 text-red-800'; break;
+                }
+                const row = `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-4 font-medium text-gray-900">${turma.cursoNome}</td>
+                        <td class="p-4">${turma.empresaNome}</td>
+                        <td class="p-4">${turma.data ? turma.data.toLocaleDateString('pt-BR') : 'N/A'}</td>
+                        <td class="p-4">${turma.alunos ? turma.alunos.length : 0}</td>
+                        <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full ${statusClass}">${turma.status}</span></td>
+                        <td class="p-4 flex gap-4 text-gray-500">
+                             <ion-icon onclick="window.editTurma('${turma.id}')" name="create-outline" class="text-lg cursor-pointer hover:text-blue-600" title="Editar"></ion-icon>
+                             <ion-icon onclick="window.deleteTurma('${turma.id}')" name="trash-outline" class="text-lg cursor-pointer hover:text-red-600" title="Excluir"></ion-icon>
+                             ${turma.status === 'Concluída' ? `<ion-icon name="document-text-outline" class="text-lg cursor-pointer hover:text-green-600" title="Emitir Certificados"></ion-icon>` : ''}
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+            updatePaginationControls();
+        }
+
+        // --- EVENT LISTENERS & POPULATORS ---
+        document.getElementById('apply-filters-button').addEventListener('click', applyFiltersAndSearch);
+        document.getElementById('clear-filters-button').addEventListener('click', () => {
+             document.querySelector('form').reset();
+             applyFiltersAndSearch();
+        });
+        document.getElementById('search-input').addEventListener('input', applyFiltersAndSearch);
+
+        function populateCursosFilter() {
+            const select = document.getElementById('curso-nome');
+            select.innerHTML = '<option value="">Selecione um curso</option>';
+            cursosDisponiveis.forEach(curso => select.innerHTML += `<option value="${curso}">${curso}</option>`);
+        }
+        
+        function populateEmpresasFilter() {
+            const select = document.getElementById('empresa-select');
+            select.innerHTML = '<option value="">Selecione uma empresa</option>';
+            allCompanies.forEach(empresa => select.innerHTML += `<option value="${empresa.id}">${empresa.nome}</option>`);
+        }
+        
+        // --- FORM SUBMISSIONS ---
+        document.getElementById('turma-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const turmaId = document.getElementById('turma-id').value;
+            const empresaSelect = document.getElementById('empresa-select');
+            
+            const turmaData = {
+                cursoNome: document.getElementById('curso-nome').value,
+                empresaId: empresaSelect.value,
+                empresaNome: empresaSelect.options[empresaSelect.selectedIndex].text,
+                data: Timestamp.fromDate(new Date(document.getElementById('turma-data').value)),
+                status: document.getElementById('turma-status').value,
+                alunos: tempAlunosList
+            };
+
+            try {
+                if (turmaId) {
+                    await updateDoc(doc(db, "turmas", turmaId), turmaData);
+                } else {
+                    await addDoc(collection(db, "turmas"), turmaData);
+                }
+                closeTurmaModal();
+                fetchTurmas();
+            } catch (error) {
+                console.error("Erro ao salvar turma: ", error);
+            }
+        });
+
+        document.getElementById('aluno-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const alunoId = document.getElementById('aluno-id').value;
+            const file = document.getElementById('aluno-documento').files[0];
+            const uploadStatus = document.getElementById('upload-status');
+            
+            let alunoData = {
+                nome: document.getElementById('aluno-nome').value,
+                cpf: document.getElementById('aluno-cpf').value,
+                rg: document.getElementById('aluno-rg').value,
+                nascimento: document.getElementById('aluno-nascimento').value,
+                telefone: document.getElementById('aluno-telefone').value,
+                cep: document.getElementById('aluno-cep').value,
+                rua: document.getElementById('aluno-rua').value,
+                numero: document.getElementById('aluno-numero').value,
+                bairro: document.getElementById('aluno-bairro').value,
+                cidade: document.getElementById('aluno-cidade').value,
+                uf: document.getElementById('aluno-uf').value,
+                documentoUrl: null
+            };
+
+            if (file) {
+                uploadStatus.textContent = 'Enviando documento...';
+                const storageRef = ref(storage, `documentos_alunos/${Date.now()}_${file.name}`);
+                await uploadBytes(storageRef, file);
+                alunoData.documentoUrl = await getDownloadURL(storageRef);
+                uploadStatus.textContent = 'Documento enviado!';
+            }
+
+            if (alunoId) { // Editing existing student in the list
+                const index = tempAlunosList.findIndex(a => (a.tempId || a.id) === alunoId);
+                if (index > -1) tempAlunosList[index] = { ...tempAlunosList[index], ...alunoData };
+            } else { // Adding new student
+                alunoData.tempId = `temp_${Date.now()}`;
+                tempAlunosList.push(alunoData);
+            }
+
+            updateAlunosListUI();
+            closeAlunoModal();
+        });
+
+        // --- UI UPDATES & HELPERS ---
+        function updateAlunosListUI() {
+            const listContainer = document.getElementById('alunos-list');
+            listContainer.innerHTML = '';
+            if (tempAlunosList.length === 0) {
+                listContainer.innerHTML = '<p class="text-center text-gray-500 text-sm">Nenhum aluno adicionado.</p>';
+                return;
+            }
+            tempAlunosList.forEach((aluno, index) => {
+                const alunoDiv = document.createElement('div');
+                alunoDiv.className = 'flex justify-between items-center p-2 bg-white rounded-md border';
+                alunoDiv.innerHTML = `
+                    <span class="text-sm">${aluno.nome}</span>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="window.editAluno(${index})" class="text-blue-600"><ion-icon name="create-outline"></ion-icon></button>
+                        <button type="button" onclick="window.removeAluno(${index})" class="text-red-600"><ion-icon name="trash-outline"></ion-icon></button>
+                    </div>
+                `;
+                listContainer.appendChild(alunoDiv);
+            });
+        }
+        
+        // Expose functions to global scope for onclick events
+        window.editAluno = (index) => {
+            const aluno = tempAlunosList[index];
+            if (aluno) openAlunoModal(aluno);
+        };
+
+        window.removeAluno = (index) => {
+            if (confirm(`Tem certeza que deseja remover ${tempAlunosList[index].nome}?`)) {
+                tempAlunosList.splice(index, 1);
+                updateAlunosListUI();
+            }
+        };
+
+        window.editTurma = (id) => {
+            const turma = allTurmas.find(t => t.id === id);
+            if (turma) openTurmaModal(turma);
+        };
+
+        window.deleteTurma = async (id) => {
+            if (confirm('Tem certeza que deseja excluir esta turma?')) {
+                await deleteDoc(doc(db, "turmas", id));
+                fetchTurmas();
+            }
+        };
+        
+        // --- CEP, CPF, TELEFONE FORMATTING ---
+        document.getElementById('buscar-cep-button').addEventListener('click', async () => {
+            const cep = document.getElementById('aluno-cep').value.replace(/\D/g, '');
+            if (cep.length !== 8) return alert('CEP inválido.');
+            try {
+                const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                const data = await response.json();
+                if (data.erro) return alert('CEP não encontrado.');
+                document.getElementById('aluno-rua').value = data.logradouro;
+                document.getElementById('aluno-bairro').value = data.bairro;
+                document.getElementById('aluno-cidade').value = data.localidade;
+                document.getElementById('aluno-uf').value = data.uf;
+            } catch (error) {
+                alert('Erro ao buscar CEP.');
+            }
+        });
+        
+        const formatarCPF = (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.substring(0, 11);
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            e.target.value = value;
+        };
+        document.getElementById('aluno-cpf').addEventListener('input', formatarCPF);
+        
+        const formatarTelefone = (e) => {
+            let value = e.target.value.replace(/\D/g, '').substring(0, 11);
+            if (value.length > 6) {
+                value = `(${value.substring(0, 2)}) ${value.substring(2, 7)}-${value.substring(7)}`;
+            } else if (value.length > 2) {
+                value = `(${value.substring(0, 2)}) ${value.substring(2)}`;
+            } else if (value.length > 0) {
+                value = `(${value}`;
+            }
+            e.target.value = value;
+        };
+        document.getElementById('aluno-telefone').addEventListener('input', formatarTelefone);
+
+        // --- PAGINATION CONTROLS ---
+        function updatePaginationControls() {
+            const totalPages = Math.ceil(filteredTurmas.length / itemsPerPage);
+            const info = document.getElementById('pagination-info');
+            const prev = document.getElementById('prev-page-button');
+            const next = document.getElementById('next-page-button');
+            
+            if (filteredTurmas.length === 0) {
+                 info.textContent = 'Mostrando 0-0 de 0 turmas';
+            } else {
+                const start = (currentPage - 1) * itemsPerPage + 1;
+                const end = Math.min(currentPage * itemsPerPage, filteredTurmas.length);
+                info.textContent = `Mostrando ${start}-${end} de ${filteredTurmas.length} turmas`;
+            }
+            
+            prev.disabled = currentPage === 1;
+            next.disabled = currentPage === totalPages || totalPages === 0;
+        }
+
+        document.getElementById('prev-page-button').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                displayTurmas();
+            }
+        });
+
+        document.getElementById('next-page-button').addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredTurmas.length / itemsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                displayTurmas();
+            }
+        });
+
+    </script>
 </body>
 </html>
 
