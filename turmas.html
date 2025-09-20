@@ -202,20 +202,20 @@
                 <!-- Coluna Esquerda: Dados da Turma -->
                 <div class="space-y-4">
                     <div>
-                        <label for="curso-nome" class="block mb-2 text-sm font-medium text-gray-600">Curso</label>
-                        <select id="curso-nome" class="w-full px-3 py-2 border rounded-lg" required></select>
+                        <label for="curso-nome" class="block mb-1 text-sm font-medium text-gray-600">Curso</label>
+                        <select id="curso-nome" class="mt-1 w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" required></select>
                     </div>
                      <div>
-                        <label for="empresa-select" class="block mb-2 text-sm font-medium text-gray-600">Empresa</label>
-                        <select id="empresa-select" class="w-full px-3 py-2 border rounded-lg" required></select>
+                        <label for="empresa-select" class="block mb-1 text-sm font-medium text-gray-600">Empresa</label>
+                        <select id="empresa-select" class="mt-1 w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" required></select>
                     </div>
                     <div>
-                        <label for="turma-data" class="block mb-2 text-sm font-medium text-gray-600">Data do Treinamento</label>
-                        <input type="date" id="turma-data" class="w-full px-3 py-2 border rounded-lg" required>
+                        <label for="turma-data" class="block mb-1 text-sm font-medium text-gray-600">Data do Treinamento</label>
+                        <input type="date" id="turma-data" class="mt-1 w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" required>
                     </div>
                     <div>
-                        <label for="turma-status" class="block mb-2 text-sm font-medium text-gray-600">Status</label>
-                        <select id="turma-status" class="w-full px-3 py-2 border rounded-lg" required>
+                        <label for="turma-status" class="block mb-1 text-sm font-medium text-gray-600">Status</label>
+                        <select id="turma-status" class="mt-1 w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" required>
                             <option value="Agendada">Agendada</option>
                             <option value="Em Andamento">Em Andamento</option>
                             <option value="Concluída">Concluída</option>
@@ -254,50 +254,50 @@
              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="col-span-2">
                     <label for="aluno-nome" class="block text-sm font-medium text-gray-700">Nome Completo</label>
-                    <input type="text" id="aluno-nome" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                    <input type="text" id="aluno-nome" class="mt-1 w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" required>
                 </div>
                  <div>
                     <label for="aluno-cpf" class="block text-sm font-medium text-gray-700">CPF</label>
-                    <input type="text" id="aluno-cpf" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" placeholder="000.000.000-00" required>
+                    <input type="text" id="aluno-cpf" class="mt-1 w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="000.000.000-00" required>
                 </div>
                 <div>
                     <label for="aluno-rg" class="block text-sm font-medium text-gray-700">RG</label>
-                    <input type="text" id="aluno-rg" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                    <input type="text" id="aluno-rg" class="mt-1 w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500">
                 </div>
                  <div>
                     <label for="aluno-nascimento" class="block text-sm font-medium text-gray-700">Data de Nascimento</label>
-                    <input type="date" id="aluno-nascimento" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                    <input type="date" id="aluno-nascimento" class="mt-1 w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" required>
                 </div>
                 <div>
                     <label for="aluno-telefone" class="block text-sm font-medium text-gray-700">Telefone</label>
-                    <input type="text" id="aluno-telefone" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" placeholder="(XX) XXXXX-XXXX" required>
+                    <input type="text" id="aluno-telefone" class="mt-1 w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="(XX) XXXXX-XXXX" required>
                 </div>
                 <div class="col-span-2">
                     <label for="aluno-cep" class="block text-sm font-medium text-gray-700">CEP</label>
                     <div class="flex gap-2">
-                        <input type="text" id="aluno-cep" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
-                        <button type="button" id="buscar-cep-button" class="mt-1 px-3 py-1 bg-gray-200 rounded-md text-sm">Buscar</button>
+                        <input type="text" id="aluno-cep" class="mt-1 w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        <button type="button" id="buscar-cep-button" class="mt-1 px-3 py-1 bg-gray-200 rounded-md text-sm hover:bg-gray-300">Buscar</button>
                     </div>
                 </div>
                 <div class="col-span-2">
                     <label for="aluno-rua" class="block text-sm font-medium text-gray-700">Rua</label>
-                    <input type="text" id="aluno-rua" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100" readonly>
+                    <input type="text" id="aluno-rua" class="mt-1 w-full border-gray-300 rounded-md shadow-sm bg-gray-100" readonly>
                 </div>
                 <div>
                     <label for="aluno-numero" class="block text-sm font-medium text-gray-700">Número</label>
-                    <input type="text" id="aluno-numero" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                    <input type="text" id="aluno-numero" class="mt-1 w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500">
                 </div>
                 <div>
                     <label for="aluno-bairro" class="block text-sm font-medium text-gray-700">Bairro</label>
-                    <input type="text" id="aluno-bairro" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100" readonly>
+                    <input type="text" id="aluno-bairro" class="mt-1 w-full border-gray-300 rounded-md shadow-sm bg-gray-100" readonly>
                 </div>
                  <div>
                     <label for="aluno-cidade" class="block text-sm font-medium text-gray-700">Cidade</label>
-                    <input type="text" id="aluno-cidade" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100" readonly>
+                    <input type="text" id="aluno-cidade" class="mt-1 w-full border-gray-300 rounded-md shadow-sm bg-gray-100" readonly>
                 </div>
                  <div>
                     <label for="aluno-uf" class="block text-sm font-medium text-gray-700">UF</label>
-                    <input type="text" id="aluno-uf" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100" readonly>
+                    <input type="text" id="aluno-uf" class="mt-1 w-full border-gray-300 rounded-md shadow-sm bg-gray-100" readonly>
                 </div>
                 <div class="col-span-2">
                     <label for="aluno-documento" class="block text-sm font-medium text-gray-700">Documento (Opcional - PDF ou Imagem)</label>
