@@ -16,24 +16,25 @@
     <!-- Ionicons CDN -->
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+    <!-- PDF Generation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
     
     <style>
-        body { 
-            font-family: 'Inter', sans-serif; 
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+        .modal-backdrop {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); z-index: 40;
         }
-        /* Custom scrollbar for better aesthetics */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #d1d5db;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #9ca3af;
+        .modal {
+            display: none; position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); z-index: 50;
         }
     </style>
 </head>
@@ -44,14 +45,14 @@
         <aside class="w-64 flex-shrink-0 bg-slate-900 text-gray-300 flex flex-col transition-all duration-300">
             <!-- Logo -->
             <div class="h-20 flex items-center justify-center px-4 border-b border-slate-800">
-                 <div class="flex items-center gap-3">
-                    <ion-icon name="shield-checkmark-outline" class="text-3xl text-orange-500"></ion-icon>
-                    <span class="text-white text-2xl font-bold">CONFYN</span>
-                </div>
-            </div>
+                <div class="flex items-center gap-3">
+                   <ion-icon name="shield-checkmark-outline" class="text-3xl text-orange-500"></ion-icon>
+                   <span class="text-white text-2xl font-bold">CONFYN</span>
+               </div>
+           </div>
 
-            <!-- Menu -->
-            <nav class="flex-1 px-4 py-6 space-y-2">
+           <!-- Menu -->
+           <nav class="flex-1 px-4 py-6 space-y-2">
                 <a href="dashboard.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
                     <ion-icon name="grid-outline" class="text-xl"></ion-icon>
                     <span class="ml-4">Dashboard</span>
@@ -81,14 +82,6 @@
                     <span class="ml-4">Administrativo</span>
                 </a>
             </nav>
-
-            <!-- Rodapé da Sidebar -->
-            <div class="p-4 border-t border-slate-800">
-                <a href="#" class="flex items-center text-sm">
-                    <ion-icon name="chevron-back-outline" class="text-xl"></ion-icon>
-                    <span class="ml-2">Recolher Menu</span>
-                </a>
-            </div>
         </aside>
 
         <!-- Conteúdo Principal -->
@@ -102,14 +95,14 @@
                 <div class="flex items-center gap-6">
                     <div class="relative">
                         <ion-icon name="search-outline" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></ion-icon>
-                        <input type="text" placeholder="Busca rápida..." class="pl-10 pr-4 py-2 w-64 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        <input type="text" id="search-input" placeholder="Pesquisar..." class="pl-10 pr-4 py-2 w-64 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
                     </div>
                     <ion-icon name="notifications-outline" class="text-2xl text-gray-600 cursor-pointer"></ion-icon>
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-slate-300 flex items-center justify-center font-bold text-slate-600">UN</div>
+                        <div class="w-10 h-10 rounded-full bg-slate-300 flex items-center justify-center font-bold text-slate-600" id="user-initials">UN</div>
                         <div>
-                            <p class="font-semibold text-sm">Usuário Admin</p>
-                            <a href="index.html" class="text-xs text-orange-600 hover:underline">Sair</a>
+                            <p class="font-semibold text-sm" id="user-name">Usuário</p>
+                            <a href="#" id="logout-button" class="text-xs text-orange-600 hover:underline">Sair</a>
                         </div>
                     </div>
                 </div>
@@ -117,113 +110,511 @@
 
             <!-- Área de Conteúdo -->
             <main class="flex-1 p-8 overflow-y-auto">
-                <!-- Indicadores Financeiros -->
-                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <!-- Indicadores -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div class="bg-white p-6 rounded-lg shadow-sm">
-                        <p class="text-sm text-gray-500">Contas a Receber (mês)</p>
-                        <p class="text-2xl font-bold text-blue-600">R$ 12.540,00</p>
+                        <p class="text-sm text-gray-500">Contas a Receber (Mês)</p>
+                        <p class="text-2xl font-bold text-green-600" id="contas-receber">R$ 0,00</p>
                     </div>
                     <div class="bg-white p-6 rounded-lg shadow-sm">
-                        <p class="text-sm text-gray-500">Contas a Pagar (mês)</p>
-                        <p class="text-2xl font-bold text-red-600">R$ 3.820,00</p>
+                        <p class="text-sm text-gray-500">Contas a Pagar (Mês)</p>
+                        <p class="text-2xl font-bold text-red-600" id="contas-pagar">R$ 0,00</p>
                     </div>
                     <div class="bg-white p-6 rounded-lg shadow-sm">
                         <p class="text-sm text-gray-500">Saldo do Mês</p>
-                        <p class="text-2xl font-bold text-green-600">R$ 8.720,00</p>
+                        <p class="text-2xl font-bold text-blue-600" id="saldo-mes">R$ 0,00</p>
                     </div>
                 </div>
 
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-semibold text-gray-700">Lançamentos Financeiros</h2>
-                    <button class="flex items-center gap-2 bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 transition-colors">
-                        <ion-icon name="add-outline" class="text-xl"></ion-icon>
-                        <span>Novo Lançamento</span>
-                    </button>
+                    <div class="flex gap-4">
+                         <button id="download-report-button" class="flex items-center gap-2 bg-green-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-green-600 transition-colors">
+                            <ion-icon name="download-outline"></ion-icon> Baixar Relatório
+                        </button>
+                        <button id="add-lancamento-button" class="flex items-center gap-2 bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 transition-colors">
+                            <ion-icon name="add-outline"></ion-icon> Novo Lançamento
+                        </button>
+                    </div>
                 </div>
-
+                
                 <!-- Filtros -->
                 <div class="bg-white p-4 rounded-lg shadow-sm mb-6 flex items-center gap-4">
-                     <div class="flex items-center gap-2">
-                        <label for="date-filter" class="text-sm font-medium text-gray-700">Período:</label>
-                        <input type="date" id="date-start" class="border rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    <div class="flex items-center gap-2">
+                        <label class="text-sm font-medium">Período:</label>
+                        <input type="date" id="start-date-filter" class="border rounded-lg px-3 py-1.5 text-sm">
                         <span class="text-gray-500">até</span>
-                        <input type="date" id="date-end" class="border rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        <input type="date" id="end-date-filter" class="border rounded-lg px-3 py-1.5 text-sm">
                     </div>
                     <div class="flex items-center gap-2">
-                        <label for="type-filter" class="text-sm font-medium text-gray-700">Tipo:</label>
-                        <select id="type-filter" class="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
-                            <option>Todos</option>
-                            <option>Receita</option>
-                            <option>Despesa</option>
+                        <label class="text-sm font-medium">Tipo:</label>
+                        <select id="type-filter" class="border rounded-lg px-3 py-1.5 text-sm">
+                            <option value="Todos">Todos</option>
+                            <option value="Receita">Receita</option>
+                            <option value="Despesa">Despesa</option>
                         </select>
                     </div>
                     <div class="flex items-center gap-2">
-                        <label for="status-filter" class="text-sm font-medium text-gray-700">Status:</label>
-                        <select id="status-filter" class="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
-                            <option>Todos</option>
-                            <option>Paga</option>
-                            <option>Em Aberto</option>
-                            <option>Atrasada</option>
+                        <label class="text-sm font-medium">Status:</label>
+                        <select id="status-filter" class="border rounded-lg px-3 py-1.5 text-sm">
+                            <option value="Todos">Todos</option>
+                            <option value="Paga">Paga</option>
+                            <option value="Em Aberto">Em Aberto</option>
+                            <option value="Atrasada">Atrasada</option>
                         </select>
                     </div>
-                    <button class="bg-slate-800 text-white font-semibold py-1.5 px-4 rounded-lg hover:bg-slate-700 transition-colors text-sm">Aplicar</button>
-                    <button class="text-gray-600 hover:text-gray-800 font-medium text-sm">Limpar</button>
+                     <button id="apply-filters-button" class="bg-slate-800 text-white font-semibold py-1.5 px-4 rounded-lg text-sm">Aplicar</button>
+                     <button id="clear-filters-button" class="text-gray-600 font-medium text-sm">Limpar</button>
                 </div>
 
                 <!-- Tabela de Lançamentos -->
                 <div class="bg-white rounded-lg shadow-sm overflow-hidden">
                     <table class="w-full text-sm text-left text-gray-600">
-                        <thead class="bg-gray-50 text-xs text-gray-700 uppercase tracking-wider">
+                        <thead class="bg-gray-50 text-xs text-gray-700 uppercase">
                             <tr>
                                 <th class="p-4">Descrição</th>
                                 <th class="p-4">Empresa</th>
-                                <th class="p-4">Data Venc.</th>
+                                <th class="p-4">Vencimento</th>
                                 <th class="p-4">Valor</th>
                                 <th class="p-4">Status</th>
                                 <th class="p-4">Ações</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">Treinamento Brigada Nível I</td>
-                                <td class="p-4">Acme Corporation</td>
-                                <td class="p-4">10/10/2025</td>
-                                <td class="p-4 font-semibold text-green-600">R$ 4.500,00</td>
-                                <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Paga</span></td>
-                                <td class="p-4 flex gap-4 text-gray-500">
-                                    <ion-icon name="eye-outline" class="text-lg cursor-pointer hover:text-orange-600" title="Ver Detalhes"></ion-icon>
-                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600" title="Editar"></ion-icon>
-                                </td>
-                            </tr>
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">Treinamento NR-35</td>
-                                <td class="p-4">Soluções XYZ Ltda</td>
-                                <td class="p-4">25/09/2025</td>
-                                <td class="p-4 font-semibold text-green-600">R$ 2.800,00</td>
-                                <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Em Aberto</span></td>
-                                <td class="p-4 flex gap-4 text-gray-500">
-                                     <ion-icon name="eye-outline" class="text-lg cursor-pointer hover:text-orange-600" title="Ver Detalhes"></ion-icon>
-                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600" title="Editar"></ion-icon>
-                                </td>
-                            </tr>
-                             <tr class="border-b hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">Aluguel do Escritório</td>
-                                <td class="p-4">Imobiliária Central</td>
-                                <td class="p-4">05/09/2025</td>
-                                <td class="p-4 font-semibold text-red-600">- R$ 2.500,00</td>
-                                <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Atrasada</span></td>
-                                <td class="p-4 flex gap-4 text-gray-500">
-                                    <ion-icon name="eye-outline" class="text-lg cursor-pointer hover:text-orange-600" title="Ver Detalhes"></ion-icon>
-                                    <ion-icon name="checkmark-done-outline" class="text-lg cursor-pointer hover:text-green-600" title="Marcar como Paga"></ion-icon>
-                                </td>
-                            </tr>
+                        <tbody id="lancamentos-table-body">
+                           <tr><td colspan="6" class="text-center p-8">Carregando dados...</td></tr>
                         </tbody>
                     </table>
+                </div>
+                
+                <!-- Paginação -->
+                <div class="flex justify-between items-center mt-6">
+                    <span id="pagination-info" class="text-sm text-gray-600">Mostrando 0-0 de 0 lançamentos</span>
+                    <div class="flex gap-2">
+                        <button id="prev-page-button" class="px-4 py-2 text-sm font-medium bg-white border rounded-lg disabled:opacity-50" disabled>Anterior</button>
+                        <button id="next-page-button" class="px-4 py-2 text-sm font-medium bg-white border rounded-lg disabled:opacity-50" disabled>Próximo</button>
+                    </div>
                 </div>
             </main>
         </div>
     </div>
+    
+    <!-- Modal para Lançamento -->
+    <div id="lancamento-modal-backdrop" class="modal-backdrop"></div>
+    <div id="lancamento-modal" class="modal bg-white rounded-lg shadow-xl w-full max-w-2xl">
+        <div class="p-6 border-b"><h3 id="lancamento-modal-title" class="text-xl font-semibold">Novo Lançamento</h3></div>
+        <form id="lancamento-form" class="p-6">
+            <input type="hidden" id="lancamento-id">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium">Tipo</label>
+                    <select id="lancamento-tipo" class="mt-1 w-full border-gray-300 rounded-md" required>
+                        <option value="Receita">Receita</option>
+                        <option value="Despesa">Despesa</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">Empresa</label>
+                    <select id="lancamento-empresa" class="mt-1 w-full border-gray-300 rounded-md"></select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">Associado a</label>
+                    <select id="lancamento-desc-tipo" class="mt-1 w-full border-gray-300 rounded-md">
+                        <option value="Outro">Outro</option>
+                        <option value="Curso">Curso</option>
+                        <option value="Estoque">Item de Estoque</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">Descrição</label>
+                    <select id="lancamento-desc-item" class="mt-1 w-full border-gray-300 rounded-md hidden"></select>
+                    <input type="text" id="lancamento-desc-outro" class="mt-1 w-full border-gray-300 rounded-md" required>
+                </div>
+                 <div>
+                    <label class="block text-sm font-medium">Vencimento</label>
+                    <input type="date" id="lancamento-vencimento" class="mt-1 w-full border-gray-300 rounded-md" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium">Valor (R$)</label>
+                    <input type="text" id="lancamento-valor" class="mt-1 w-full border-gray-300 rounded-md" required>
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-sm font-medium">Status</label>
+                    <select id="lancamento-status" class="mt-1 w-full border-gray-300 rounded-md" required>
+                        <option value="Em Aberto">Em Aberto</option>
+                        <option value="Paga">Paga</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end gap-4">
+                <button type="button" id="cancel-lancamento-modal" class="px-4 py-2 bg-gray-200 rounded-lg">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-orange-500 text-white rounded-lg">Salvar</button>
+            </div>
+        </form>
+    </div>
 
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc, query, orderBy, where, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        
+        // ====================================================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDJEFwpP0GuuBugz4KFgzwdJTlhXS3H7w8",
+            authDomain: "confyn-47447.firebaseapp.com",
+            projectId: "confyn-47447",
+            storageBucket: "confyn-47447.firebasestorage.app",
+            messagingSenderId: "292650745185",
+            appId: "1:292650745185:web:2e1555246eb1b14c115920"
+        };
+        // ====================================================================================
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- AUTH & SECURITY ---
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                const userName = user.email.split('@')[0];
+                document.getElementById('user-name').textContent = userName;
+                document.getElementById('user-initials').textContent = userName.substring(0, 2).toUpperCase();
+                loadInitialData();
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+        document.getElementById('logout-button').addEventListener('click', () => signOut(auth));
+
+        // --- GLOBAL STATE ---
+        let allLancamentos = [];
+        let filteredLancamentos = [];
+        let allCompanies = [], allCursos = [], allEstoque = [];
+        let currentPage = 1;
+        const itemsPerPage = 5;
+
+        // --- INITIAL DATA LOADING ---
+        async function loadInitialData() {
+            await Promise.all([
+                fetchData("empresas", "nome").then(data => allCompanies = data),
+                fetchData("cursos", "nome").then(data => allCursos = data),
+                fetchData("estoque", "nome").then(data => allEstoque = data)
+            ]);
+            await fetchLancamentos();
+            populateEmpresasSelect();
+        }
+        
+        async function fetchData(collectionName, orderByField) {
+            try {
+                const q = query(collection(db, collectionName), orderBy(orderByField));
+                const snapshot = await getDocs(q);
+                return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            } catch (error) {
+                console.error(`Erro ao buscar ${collectionName}:`, error);
+                return [];
+            }
+        }
+
+        async function fetchLancamentos() {
+            try {
+                const q = query(collection(db, "lancamentos"), orderBy("createdAt", "desc"));
+                const snapshot = await getDocs(q);
+                allLancamentos = snapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return {
+                        id: doc.id, ...data,
+                        vencimento: data.vencimento ? data.vencimento.toDate() : null
+                    };
+                });
+                applyFiltersAndSearch();
+            } catch (error) {
+                console.error("Erro ao buscar lançamentos:", error);
+            }
+        }
+        
+        // --- MODAL LANCAMENTO ---
+        const lancamentoModal = document.getElementById('lancamento-modal');
+        const lancamentoModalBackdrop = document.getElementById('lancamento-modal-backdrop');
+        const lancamentoForm = document.getElementById('lancamento-form');
+
+        const openLancamentoModal = (lancamento = null) => {
+            lancamentoForm.reset();
+            document.getElementById('lancamento-id').value = '';
+            toggleDescriptionFields(); // Reset description fields
+
+            if (lancamento) {
+                 document.getElementById('lancamento-modal-title').textContent = 'Editar Lançamento';
+                 document.getElementById('lancamento-id').value = lancamento.id;
+                 document.getElementById('lancamento-tipo').value = lancamento.tipo;
+                 document.getElementById('lancamento-empresa').value = lancamento.empresaId || '';
+                 document.getElementById('lancamento-vencimento').valueAsDate = lancamento.vencimento;
+                 document.getElementById('lancamento-valor').value = formatCurrency(lancamento.valor);
+                 document.getElementById('lancamento-status').value = lancamento.status;
+                 
+                 // Handle description
+                 if(lancamento.descricaoTipo === 'Curso' || lancamento.descricaoTipo === 'Estoque') {
+                    document.getElementById('lancamento-desc-tipo').value = lancamento.descricaoTipo;
+                    toggleDescriptionFields(lancamento.descricao);
+                 } else {
+                    document.getElementById('lancamento-desc-outro').value = lancamento.descricao;
+                 }
+
+            } else {
+                document.getElementById('lancamento-modal-title').textContent = 'Novo Lançamento';
+            }
+
+            lancamentoModal.style.display = 'block';
+            lancamentoModalBackdrop.style.display = 'block';
+        };
+
+        const closeLancamentoModal = () => {
+            lancamentoModal.style.display = 'none';
+            lancamentoModalBackdrop.style.display = 'none';
+        };
+        
+        document.getElementById('add-lancamento-button').addEventListener('click', () => openLancamentoModal());
+        document.getElementById('cancel-lancamento-modal').addEventListener('click', closeLancamentoModal);
+
+        // --- FORM LOGIC & SUBMISSION ---
+        lancamentoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const lancamentoId = document.getElementById('lancamento-id').value;
+            const empresaSelect = document.getElementById('lancamento-empresa');
+            
+            let descricao = '';
+            const descTipo = document.getElementById('lancamento-desc-tipo').value;
+            if(descTipo === 'Outro') {
+                descricao = document.getElementById('lancamento-desc-outro').value;
+            } else {
+                descricao = document.getElementById('lancamento-desc-item').value;
+            }
+
+            const lancamentoData = {
+                tipo: document.getElementById('lancamento-tipo').value,
+                empresaId: empresaSelect.value,
+                empresaNome: empresaSelect.value ? empresaSelect.options[empresaSelect.selectedIndex].text : 'N/A',
+                descricaoTipo: descTipo,
+                descricao,
+                vencimento: Timestamp.fromDate(new Date(document.getElementById('lancamento-vencimento').value + 'T00:00:00')),
+                valor: parseFloat(document.getElementById('lancamento-valor').value.replace(/\./g, '').replace(',', '.')),
+                status: document.getElementById('lancamento-status').value,
+                createdAt: Timestamp.now()
+            };
+
+            try {
+                if (lancamentoId) {
+                    delete lancamentoData.createdAt; // Do not update createdAt on edit
+                    await updateDoc(doc(db, "lancamentos", lancamentoId), lancamentoData);
+                } else {
+                    await addDoc(collection(db, "lancamentos"), lancamentoData);
+                }
+                closeLancamentoModal();
+                fetchLancamentos();
+            } catch (error) {
+                console.error("Erro ao salvar lançamento:", error);
+            }
+        });
+
+        // --- ACTIONS ---
+        window.editLancamento = (id) => {
+            const lancamento = allLancamentos.find(l => l.id === id);
+            if (lancamento) openLancamentoModal(lancamento);
+        };
+        window.deleteLancamento = async (id) => {
+            if(confirm('Tem certeza que deseja excluir este lançamento?')) {
+                await deleteDoc(doc(db, "lancamentos", id));
+                fetchLancamentos();
+            }
+        };
+        window.marcarComoPago = async (id) => {
+            if(confirm('Deseja marcar este lançamento como "Paga"?')) {
+                await updateDoc(doc(db, "lancamentos", id), { status: 'Paga' });
+                fetchLancamentos();
+            }
+        };
+
+        // --- DISPLAY & FILTERS ---
+        function applyFiltersAndSearch() {
+            const startDate = document.getElementById('start-date-filter').value;
+            const endDate = document.getElementById('end-date-filter').value;
+            const type = document.getElementById('type-filter').value;
+            const status = document.getElementById('status-filter').value;
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            
+            const hoje = new Date();
+            hoje.setHours(0,0,0,0);
+
+            filteredLancamentos = allLancamentos.filter(l => {
+                const vencimento = l.vencimento;
+                const statusReal = (l.status === 'Em Aberto' && vencimento < hoje) ? 'Atrasada' : l.status;
+
+                const dateMatch = (!startDate || vencimento >= new Date(startDate+'T00:00:00')) &&
+                                  (!endDate || vencimento <= new Date(endDate+'T23:59:59'));
+                const typeMatch = type === 'Todos' || l.tipo === type;
+                const statusMatch = status === 'Todos' || statusReal === status;
+                const searchMatch = !searchTerm || l.descricao.toLowerCase().includes(searchTerm) || l.empresaNome.toLowerCase().includes(searchTerm);
+
+                return dateMatch && typeMatch && statusMatch && searchMatch;
+            });
+            currentPage = 1;
+            displayLancamentos();
+            updateStats();
+        }
+
+        function displayLancamentos() {
+            const tableBody = document.getElementById('lancamentos-table-body');
+            tableBody.innerHTML = '';
+            if (filteredLancamentos.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="6" class="text-center p-8">Nenhum lançamento encontrado.</td></tr>`;
+                updatePaginationControls();
+                return;
+            }
+            
+            const hoje = new Date();
+            hoje.setHours(0,0,0,0);
+
+            const paginated = filteredLancamentos.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+            paginated.forEach(l => {
+                let statusReal = l.status;
+                let statusClass = 'bg-blue-100 text-blue-800'; // Em Aberto
+
+                if(l.status === 'Paga') {
+                    statusClass = 'bg-green-100 text-green-800';
+                } else if (l.vencimento < hoje) {
+                    statusReal = 'Atrasada';
+                    statusClass = 'bg-red-100 text-red-800';
+                }
+
+                const row = `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-4 font-medium">${l.descricao} <span class="text-xs ${l.tipo === 'Receita' ? 'text-green-600' : 'text-red-600'}">(${l.tipo})</span></td>
+                        <td class="p-4">${l.empresaNome}</td>
+                        <td class="p-4">${l.vencimento.toLocaleDateString('pt-BR')}</td>
+                        <td class="p-4 font-semibold">${l.valor.toLocaleString('pt-BR', {style:'currency', currency: 'BRL'})}</td>
+                        <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full ${statusClass}">${statusReal}</span></td>
+                        <td class="p-4 flex gap-3 text-gray-500">
+                            ${l.status !== 'Paga' ? `<ion-icon onclick="marcarComoPago('${l.id}')" name="checkmark-circle-outline" class="cursor-pointer text-xl hover:text-green-600" title="Marcar como pago"></ion-icon>` : ''}
+                            <ion-icon onclick="editLancamento('${l.id}')" name="create-outline" class="cursor-pointer text-xl hover:text-blue-600" title="Editar"></ion-icon>
+                            <ion-icon onclick="deleteLancamento('${l.id}')" name="trash-outline" class="cursor-pointer text-xl hover:text-red-600" title="Excluir"></ion-icon>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+            updatePaginationControls();
+        }
+
+        document.getElementById('apply-filters-button').addEventListener('click', applyFiltersAndSearch);
+        document.getElementById('clear-filters-button').addEventListener('click', () => {
+            document.getElementById('start-date-filter').value = '';
+            document.getElementById('end-date-filter').value = '';
+            document.getElementById('type-filter').value = 'Todos';
+            document.getElementById('status-filter').value = 'Todos';
+            applyFiltersAndSearch();
+        });
+        document.getElementById('search-input').addEventListener('input', applyFiltersAndSearch);
+
+        // --- HELPERS & UI ---
+        function updateStats() {
+            const hoje = new Date();
+            const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+            const ultimoDia = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+
+            const mesAtual = allLancamentos.filter(l => l.vencimento >= primeiroDia && l.vencimento <= ultimoDia);
+            
+            const receber = mesAtual.filter(l => l.tipo === 'Receita' && l.status !== 'Paga').reduce((sum, l) => sum + l.valor, 0);
+            const pagar = mesAtual.filter(l => l.tipo === 'Despesa' && l.status !== 'Paga').reduce((sum, l) => sum + l.valor, 0);
+            const saldo = mesAtual.filter(l => l.status === 'Paga').reduce((sum, l) => sum + (l.tipo === 'Receita' ? l.valor : -l.valor), 0);
+            
+            document.getElementById('contas-receber').textContent = formatCurrency(receber);
+            document.getElementById('contas-pagar').textContent = formatCurrency(pagar);
+            document.getElementById('saldo-mes').textContent = formatCurrency(saldo);
+        }
+        
+        function populateEmpresasSelect() {
+            const select = document.getElementById('lancamento-empresa');
+            select.innerHTML = '<option value="">Nenhuma / Própria</option>';
+            allCompanies.forEach(emp => select.innerHTML += `<option value="${emp.id}">${emp.nome}</option>`);
+        }
+        
+        function toggleDescriptionFields(selectedValue = '') {
+            const tipo = document.getElementById('lancamento-desc-tipo').value;
+            const itemSelect = document.getElementById('lancamento-desc-item');
+            const outroInput = document.getElementById('lancamento-desc-outro');
+            
+            itemSelect.innerHTML = '';
+            if (tipo === 'Curso') {
+                allCursos.forEach(c => itemSelect.innerHTML += `<option value="${c.nome}">${c.nome}</option>`);
+                itemSelect.classList.remove('hidden');
+                outroInput.classList.add('hidden');
+            } else if (tipo === 'Estoque') {
+                allEstoque.forEach(i => itemSelect.innerHTML += `<option value="${i.nome}">${i.nome}</option>`);
+                itemSelect.classList.remove('hidden');
+                outroInput.classList.add('hidden');
+            } else {
+                itemSelect.classList.add('hidden');
+                outroInput.classList.remove('hidden');
+            }
+            if(selectedValue) itemSelect.value = selectedValue;
+        }
+
+        document.getElementById('lancamento-desc-tipo').addEventListener('change', () => toggleDescriptionFields());
+        
+        function formatCurrency(value) {
+            return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+        
+        document.getElementById('lancamento-valor').addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            value = (value / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            e.target.value = value;
+        });
+
+        function updatePaginationControls() {
+            const totalPages = Math.ceil(filteredLancamentos.length / itemsPerPage);
+            document.getElementById('pagination-info').textContent = `Mostrando ${filteredLancamentos.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-${Math.min(currentPage * itemsPerPage, filteredLancamentos.length)} de ${filteredLancamentos.length} lançamentos`;
+            document.getElementById('prev-page-button').disabled = currentPage === 1;
+            document.getElementById('next-page-button').disabled = currentPage === totalPages || totalPages === 0;
+        }
+
+        document.getElementById('prev-page-button').addEventListener('click', () => { if (currentPage > 1) { currentPage--; displayLancamentos(); }});
+        document.getElementById('next-page-button').addEventListener('click', () => { if (currentPage < Math.ceil(filteredLancamentos.length / itemsPerPage)) { currentPage++; displayLancamentos(); }});
+
+        document.getElementById('download-report-button').addEventListener('click', () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(20);
+            doc.setTextColor('#2c3e50');
+            doc.text("Relatório Financeiro - CONFYN", 14, 22);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, 30);
+            
+            const hoje = new Date();
+            hoje.setHours(0,0,0,0);
+            
+            const tableData = filteredLancamentos.map(l => {
+                const statusReal = (l.status === 'Em Aberto' && l.vencimento < hoje) ? 'Atrasada' : l.status;
+                return [
+                    l.descricao, l.empresaNome, l.vencimento.toLocaleDateString('pt-BR'), 
+                    formatCurrency(l.valor), statusReal
+                ];
+            });
+
+            doc.autoTable({
+                startY: 45,
+                head: [['Descrição', 'Empresa', 'Vencimento', 'Valor', 'Status']],
+                body: tableData,
+                theme: 'striped',
+                headStyles: { fillColor: '#f97316' },
+            });
+
+            doc.save('Relatorio_Financeiro_CONFYN.pdf');
+        });
+
+    </script>
 </body>
 </html>
 
