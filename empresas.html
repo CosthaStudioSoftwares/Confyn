@@ -54,14 +54,14 @@
         <aside class="w-64 flex-shrink-0 bg-slate-900 text-gray-300 flex flex-col transition-all duration-300">
             <!-- Logo -->
             <div class="h-20 flex items-center justify-center px-4 border-b border-slate-800">
-                 <div class="flex items-center gap-3">
-                    <ion-icon name="shield-checkmark-outline" class="text-3xl text-orange-500"></ion-icon>
-                    <span class="text-white text-2xl font-bold">CONFYN</span>
-                </div>
-            </div>
+                <div class="flex items-center gap-3">
+                   <ion-icon name="shield-checkmark-outline" class="text-3xl text-orange-500"></ion-icon>
+                   <span class="text-white text-2xl font-bold">CONFYN</span>
+               </div>
+           </div>
 
-            <!-- Menu -->
-            <nav class="flex-1 px-4 py-6 space-y-2">
+           <!-- Menu -->
+           <nav class="flex-1 px-4 py-6 space-y-2">
                 <a href="dashboard.html" class="flex items-center px-4 py-2.5 rounded-lg hover:bg-slate-800 transition-colors">
                     <ion-icon name="grid-outline" class="text-xl"></ion-icon>
                     <span class="ml-4">Dashboard</span>
@@ -216,35 +216,35 @@
             <input type="hidden" id="company-id">
             <div class="grid grid-cols-2 gap-4">
                 <div class="col-span-2">
-                    <label for="cnpj" class="block mb-2 text-sm font-medium text-gray-600">CNPJ</label>
-                    <input type="text" id="cnpj" class="w-full px-3 py-2 border rounded-lg" required>
+                    <label for="cnpj" class="block mb-1 text-sm font-medium text-gray-600">CNPJ</label>
+                    <input type="text" id="cnpj" class="w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" required>
                     <p id="cnpj-error" class="text-red-500 text-xs mt-1 hidden"></p>
                 </div>
                 <div class="col-span-2">
-                    <label for="nome" class="block mb-2 text-sm font-medium text-gray-600">Nome da Empresa</label>
-                    <input type="text" id="nome" class="w-full px-3 py-2 border rounded-lg" required>
+                    <label for="nome" class="block mb-1 text-sm font-medium text-gray-600">Nome da Empresa</label>
+                    <input type="text" id="nome" class="w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" required>
                 </div>
                  <div>
-                    <label for="contato" class="block mb-2 text-sm font-medium text-gray-600">Contato Principal</label>
-                    <input type="text" id="contato" class="w-full px-3 py-2 border rounded-lg" required>
+                    <label for="contato" class="block mb-1 text-sm font-medium text-gray-600">Contato Principal</label>
+                    <input type="text" id="contato" class="w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" required>
                 </div>
                  <div>
-                    <label for="telefone" class="block mb-2 text-sm font-medium text-gray-600">Telefone</label>
-                    <input type="text" id="telefone" class="w-full px-3 py-2 border rounded-lg" placeholder="(XX) XXXXX-XXXX" required>
-                     <p id="telefone-error" class="text-red-500 text-xs mt-1 hidden"></p>
+                    <label for="telefone" class="block mb-1 text-sm font-medium text-gray-600">Telefone</label>
+                    <input type="text" id="telefone" class="w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="(XX) XXXXX-XXXX" required>
+                       <p id="telefone-error" class="text-red-500 text-xs mt-1 hidden"></p>
                 </div>
                  <div class="col-span-2">
-                    <label for="email" class="block mb-2 text-sm font-medium text-gray-600">E-mail</label>
-                    <input type="email" id="email" class="w-full px-3 py-2 border rounded-lg" required>
+                    <label for="email" class="block mb-1 text-sm font-medium text-gray-600">E-mail</label>
+                    <input type="email" id="email" class="w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" required>
                     <p id="email-error" class="text-red-500 text-xs mt-1 hidden"></p>
                 </div>
                 <div>
-                    <label for="cidade" class="block mb-2 text-sm font-medium text-gray-600">Cidade</label>
-                    <input type="text" id="cidade" class="w-full px-3 py-2 border rounded-lg" required>
+                    <label for="cidade" class="block mb-1 text-sm font-medium text-gray-600">Cidade</label>
+                    <input type="text" id="cidade" class="w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" required>
                 </div>
                 <div>
-                    <label for="modal-status" class="block mb-2 text-sm font-medium text-gray-600">Status</label>
-                    <select id="modal-status" class="w-full px-3 py-2 border rounded-lg" required>
+                    <label for="modal-status" class="block mb-1 text-sm font-medium text-gray-600">Status</label>
+                    <select id="modal-status" class="w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" required>
                         <option value="Ativa">Ativa</option>
                         <option value="Inativa">Inativa</option>
                         <option value="Potencial Cliente">Potencial Cliente</option>
