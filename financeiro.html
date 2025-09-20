@@ -207,18 +207,18 @@
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium">Tipo</label>
-                    <select id="lancamento-tipo" class="mt-1 w-full border-gray-300 rounded-md" required>
+                    <select id="lancamento-tipo" class="mt-1 w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" required>
                         <option value="Receita">Receita</option>
                         <option value="Despesa">Despesa</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-sm font-medium">Empresa</label>
-                    <select id="lancamento-empresa" class="mt-1 w-full border-gray-300 rounded-md"></select>
+                    <select id="lancamento-empresa" class="mt-1 w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"></select>
                 </div>
                 <div>
                     <label class="block text-sm font-medium">Associado a</label>
-                    <select id="lancamento-desc-tipo" class="mt-1 w-full border-gray-300 rounded-md">
+                    <select id="lancamento-desc-tipo" class="mt-1 w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500">
                         <option value="Outro">Outro</option>
                         <option value="Curso">Curso</option>
                         <option value="Estoque">Item de Estoque</option>
@@ -226,28 +226,28 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium">Descrição</label>
-                    <select id="lancamento-desc-item" class="mt-1 w-full border-gray-300 rounded-md hidden"></select>
-                    <input type="text" id="lancamento-desc-outro" class="mt-1 w-full border-gray-300 rounded-md" required>
+                    <select id="lancamento-desc-item" class="mt-1 w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 hidden"></select>
+                    <input type="text" id="lancamento-desc-outro" class="mt-1 w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" required>
                 </div>
                  <div>
                     <label class="block text-sm font-medium">Vencimento</label>
-                    <input type="date" id="lancamento-vencimento" class="mt-1 w-full border-gray-300 rounded-md" required>
+                    <input type="date" id="lancamento-vencimento" class="mt-1 w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" required>
                 </div>
                 <div>
                     <label class="block text-sm font-medium">Valor (R$)</label>
-                    <input type="text" id="lancamento-valor" class="mt-1 w-full border-gray-300 rounded-md" required>
+                    <input type="text" id="lancamento-valor" class="mt-1 w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" required>
                 </div>
                 <div class="col-span-2">
                     <label class="block text-sm font-medium">Status</label>
-                    <select id="lancamento-status" class="mt-1 w-full border-gray-300 rounded-md" required>
+                    <select id="lancamento-status" class="mt-1 w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500" required>
                         <option value="Em Aberto">Em Aberto</option>
                         <option value="Paga">Paga</option>
                     </select>
                 </div>
             </div>
             <div class="mt-6 flex justify-end gap-4">
-                <button type="button" id="cancel-lancamento-modal" class="px-4 py-2 bg-gray-200 rounded-lg">Cancelar</button>
-                <button type="submit" class="px-4 py-2 bg-orange-500 text-white rounded-lg">Salvar</button>
+                <button type="button" id="cancel-lancamento-modal" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">Salvar</button>
             </div>
         </form>
     </div>
