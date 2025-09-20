@@ -4,36 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CONFYN - Módulo de Colaboradores</title>
-    
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
+
     <!-- Ionicons CDN -->
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     
+    <!-- PDF Generation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+
     <style>
-        body { 
-            font-family: 'Inter', sans-serif; 
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+        .modal-backdrop {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); z-index: 40;
         }
-        /* Custom scrollbar for better aesthetics */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #d1d5db;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #9ca3af;
+        .modal {
+            display: none; position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); z-index: 50;
         }
     </style>
 </head>
@@ -44,7 +45,7 @@
         <aside class="w-64 flex-shrink-0 bg-slate-900 text-gray-300 flex flex-col transition-all duration-300">
             <!-- Logo -->
             <div class="h-20 flex items-center justify-center px-4 border-b border-slate-800">
-                 <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3">
                     <ion-icon name="shield-checkmark-outline" class="text-3xl text-orange-500"></ion-icon>
                     <span class="text-white text-2xl font-bold">CONFYN</span>
                 </div>
@@ -81,14 +82,6 @@
                     <span class="ml-4">Administrativo</span>
                 </a>
             </nav>
-
-            <!-- Rodapé da Sidebar -->
-            <div class="p-4 border-t border-slate-800">
-                <a href="#" class="flex items-center text-sm">
-                    <ion-icon name="chevron-back-outline" class="text-xl"></ion-icon>
-                    <span class="ml-2">Recolher Menu</span>
-                </a>
-            </div>
         </aside>
 
         <!-- Conteúdo Principal -->
@@ -99,17 +92,17 @@
                     <h1 class="text-xl font-bold text-gray-800">Colaboradores</h1>
                     <p class="text-sm text-gray-500">Dashboard / Colaboradores</p>
                 </div>
-                <div class="flex items-center gap-6">
+                 <div class="flex items-center gap-6">
                     <div class="relative">
                         <ion-icon name="search-outline" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></ion-icon>
-                        <input type="text" placeholder="Busca rápida..." class="pl-10 pr-4 py-2 w-64 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        <input type="text" id="search-input" placeholder="Pesquisar por nome ou CPF..." class="pl-10 pr-4 py-2 w-64 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
                     </div>
                     <ion-icon name="notifications-outline" class="text-2xl text-gray-600 cursor-pointer"></ion-icon>
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-slate-300 flex items-center justify-center font-bold text-slate-600">UN</div>
+                        <div class="w-10 h-10 rounded-full bg-slate-300 flex items-center justify-center font-bold text-slate-600" id="user-initials">UN</div>
                         <div>
-                            <p class="font-semibold text-sm">Usuário Admin</p>
-                            <a href="index.html" class="text-xs text-orange-600 hover:underline">Sair</a>
+                            <p class="font-semibold text-sm" id="user-name">Usuário</p>
+                            <a href="#" id="logout-button" class="text-xs text-orange-600 hover:underline">Sair</a>
                         </div>
                     </div>
                 </div>
@@ -117,98 +110,489 @@
 
             <!-- Área de Conteúdo -->
             <main class="flex-1 p-8 overflow-y-auto">
-                <!-- Indicadores da Equipe -->
-                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                 <!-- Notificação de Aniversariantes -->
+                <div id="birthday-notification" class="hidden bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6 rounded-r-lg" role="alert">
+                    <p class="font-bold">Aniversariantes do Mês!</p>
+                    <p id="birthday-names">Temos colaboradores fazendo aniversário este mês. Não se esqueça de parabenizá-los!</p>
+                </div>
+
+                <!-- Indicadores -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div class="bg-white p-6 rounded-lg shadow-sm">
                         <p class="text-sm text-gray-500">Total de Colaboradores</p>
-                        <p class="text-2xl font-bold text-gray-800">12</p>
+                        <p class="text-2xl font-bold text-gray-800" id="total-colaboradores">0</p>
                     </div>
                     <div class="bg-white p-6 rounded-lg shadow-sm">
                         <p class="text-sm text-gray-500">Instrutores Ativos</p>
-                        <p class="text-2xl font-bold text-green-600">8</p>
+                        <p class="text-2xl font-bold text-green-600" id="instrutores-ativos">0</p>
                     </div>
                     <div class="bg-white p-6 rounded-lg shadow-sm">
                         <p class="text-sm text-gray-500">Administrativo</p>
-                        <p class="text-2xl font-bold text-blue-600">4</p>
+                        <p class="text-2xl font-bold text-blue-600" id="administrativo-total">0</p>
                     </div>
                 </div>
 
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-semibold text-gray-700">Listagem de Colaboradores</h2>
-                    <button class="flex items-center gap-2 bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 transition-colors">
-                        <ion-icon name="add-outline" class="text-xl"></ion-icon>
-                        <span>Adicionar Colaborador</span>
-                    </button>
-                </div>
-
-                <!-- Filtros -->
-                <div class="bg-white p-4 rounded-lg shadow-sm mb-6 flex items-center gap-4">
-                    <div class="flex items-center gap-2">
-                        <label for="funcao-filter" class="text-sm font-medium text-gray-700">Função:</label>
-                        <select id="funcao-filter" class="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
-                            <option>Todas</option>
-                            <option>Instrutor</option>
-                            <option>Administrativo</option>
-                            <option>Brigadista</option>
-                        </select>
+                    <div class="flex gap-4">
+                        <button id="download-report-button" class="flex items-center gap-2 bg-green-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-green-600 transition-colors">
+                            <ion-icon name="download-outline"></ion-icon> Baixar Relatório
+                        </button>
+                        <button id="add-colaborador-button" class="flex items-center gap-2 bg-orange-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 transition-colors">
+                            <ion-icon name="add-outline"></ion-icon> Adicionar Colaborador
+                        </button>
                     </div>
-                    <button class="bg-slate-800 text-white font-semibold py-1.5 px-4 rounded-lg hover:bg-slate-700 transition-colors text-sm">Aplicar</button>
-                    <button class="text-gray-600 hover:text-gray-800 font-medium text-sm">Limpar</button>
                 </div>
 
-                <!-- Tabela de Colaboradores -->
+                <!-- Tabela -->
                 <div class="bg-white rounded-lg shadow-sm overflow-hidden">
                     <table class="w-full text-sm text-left text-gray-600">
-                        <thead class="bg-gray-50 text-xs text-gray-700 uppercase tracking-wider">
+                        <thead class="bg-gray-50 text-xs text-gray-700 uppercase">
                             <tr>
                                 <th class="p-4">Nome</th>
-                                <th class="p-4">Função</th>
+                                <th class="p-4">Cargo</th>
                                 <th class="p-4">E-mail</th>
                                 <th class="p-4">Status</th>
                                 <th class="p-4">Ações</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">João da Silva</td>
-                                <td class="p-4">Instrutor</td>
-                                <td class="p-4">joao.silva@confyn.com</td>
-                                <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Ativo</span></td>
-                                <td class="p-4 flex gap-4 text-gray-500">
-                                    <ion-icon name="calendar-outline" class="text-lg cursor-pointer hover:text-purple-600" title="Ver Escala"></ion-icon>
-                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600" title="Editar"></ion-icon>
-                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600" title="Excluir"></ion-icon>
-                                </td>
-                            </tr>
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">Maria Oliveira</td>
-                                <td class="p-4">Administrativo</td>
-                                <td class="p-4">maria.oliveira@confyn.com</td>
-                                <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Ativo</span></td>
-                                <td class="p-4 flex gap-4 text-gray-500">
-                                    <ion-icon name="calendar-outline" class="text-lg cursor-pointer hover:text-purple-600" title="Ver Escala"></ion-icon>
-                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600" title="Editar"></ion-icon>
-                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600" title="Excluir"></ion-icon>
-                                </td>
-                            </tr>
-                            <tr class="hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">Carlos Pereira</td>
-                                <td class="p-4">Instrutor</td>
-                                <td class="p-4">carlos.pereira@confyn.com</td>
-                                <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">Inativo</span></td>
-                                <td class="p-4 flex gap-4 text-gray-500">
-                                    <ion-icon name="calendar-outline" class="text-lg cursor-pointer hover:text-purple-600" title="Ver Escala"></ion-icon>
-                                    <ion-icon name="create-outline" class="text-lg cursor-pointer hover:text-blue-600" title="Editar"></ion-icon>
-                                    <ion-icon name="trash-outline" class="text-lg cursor-pointer hover:text-red-600" title="Excluir"></ion-icon>
-                                </td>
-                            </tr>
+                        <tbody id="colaboradores-table-body">
+                            <tr><td colspan="5" class="text-center p-8">Carregando dados...</td></tr>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Paginação -->
+                <div class="flex justify-between items-center mt-6">
+                    <span id="pagination-info" class="text-sm text-gray-600">Mostrando 0-0 de 0 colaboradores</span>
+                    <div class="flex gap-2">
+                        <button id="prev-page-button" class="px-4 py-2 text-sm font-medium bg-white border rounded-lg disabled:opacity-50" disabled>Anterior</button>
+                        <button id="next-page-button" class="px-4 py-2 text-sm font-medium bg-white border rounded-lg disabled:opacity-50" disabled>Próximo</button>
+                    </div>
                 </div>
             </main>
         </div>
     </div>
+    
+    <!-- Modal para Adicionar/Editar Colaborador -->
+    <div id="colaborador-modal-backdrop" class="modal-backdrop"></div>
+    <div id="colaborador-modal" class="modal bg-white rounded-lg shadow-xl w-full max-w-4xl">
+        <div class="p-6 border-b"><h3 id="colaborador-modal-title" class="text-xl font-semibold">Adicionar Colaborador</h3></div>
+        <form id="colaborador-form" class="p-6 max-h-[80vh] overflow-y-auto">
+            <input type="hidden" id="colaborador-id">
+             <div class="flex items-start gap-6 mb-6">
+                <div class="flex flex-col items-center">
+                    <img id="profile-pic-preview" src="https://placehold.co/128x128/e2e8f0/475569?text=Foto" class="w-32 h-32 rounded-full object-cover border-4 border-gray-200">
+                    <input type="file" id="profile-pic-upload" class="hidden" accept="image/*">
+                    <button type="button" id="change-pic-button" class="mt-2 text-sm text-blue-600 hover:underline">Carregar Foto</button>
+                </div>
+                <div class="flex-grow grid grid-cols-2 gap-4">
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium mb-1">Nome Completo</label>
+                        <input type="text" id="colaborador-nome" class="form-input" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">CPF</label>
+                        <input type="text" id="colaborador-cpf" class="form-input" required>
+                        <p id="cpf-error" class="text-red-500 text-xs mt-1 hidden"></p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">RG</label>
+                        <input type="text" id="colaborador-rg" class="form-input">
+                        <p id="rg-error" class="text-red-500 text-xs mt-1 hidden"></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Dados Pessoais -->
+                <h4 class="col-span-full text-lg font-semibold border-b pb-2 mb-2">Dados Pessoais</h4>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Data de Nascimento</label>
+                    <input type="date" id="colaborador-nascimento" class="form-input" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Telefone</label>
+                    <input type="text" id="colaborador-telefone" class="form-input" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">E-mail</label>
+                    <input type="email" id="colaborador-email" class="form-input" required>
+                    <p id="email-error" class="text-red-500 text-xs mt-1 hidden"></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Título de Eleitor</label>
+                    <input type="text" id="colaborador-titulo" class="form-input">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Reservista (se aplicável)</label>
+                    <input type="text" id="colaborador-reservista" class="form-input">
+                </div>
 
+                <!-- Endereço -->
+                <h4 class="col-span-full text-lg font-semibold border-b pb-2 mb-2 mt-4">Endereço</h4>
+                 <div class="col-span-1">
+                    <label class="block text-sm font-medium mb-1">CEP</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="colaborador-cep" class="form-input w-full">
+                        <button type="button" id="buscar-cep" class="px-3 bg-gray-200 rounded-md text-sm hover:bg-gray-300">Buscar</button>
+                    </div>
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-sm font-medium mb-1">Rua</label>
+                    <input type="text" id="colaborador-rua" class="form-input bg-gray-200" readonly>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Número</label>
+                    <input type="text" id="colaborador-numero" class="form-input">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Bairro</label>
+                    <input type="text" id="colaborador-bairro" class="form-input bg-gray-200" readonly>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Cidade</label>
+                    <input type="text" id="colaborador-cidade" class="form-input bg-gray-200" readonly>
+                </div>
+
+                <!-- Dados Profissionais -->
+                <h4 class="col-span-full text-lg font-semibold border-b pb-2 mb-2 mt-4">Dados Profissionais</h4>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Cargo</label>
+                    <input type="text" id="colaborador-cargo" class="form-input" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Salário (R$)</label>
+                    <input type="text" id="colaborador-salario" class="form-input" required>
+                </div>
+                 <div>
+                    <label class="block text-sm font-medium mb-1">Data de Contratação</label>
+                    <input type="date" id="colaborador-contratacao" class="form-input" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Data da Promoção</label>
+                    <input type="date" id="colaborador-promocao" class="form-input">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Status</label>
+                    <select id="colaborador-status" class="form-input" required>
+                        <option value="Ativo">Ativo</option>
+                        <option value="Inativo">Inativo</option>
+                    </select>
+                </div>
+                <div class="col-span-full">
+                    <label class="block text-sm font-medium mb-1">Documentos (Opcional)</label>
+                    <input type="file" id="colaborador-docs" class="form-input" multiple>
+                    <p id="docs-upload-status" class="text-xs text-gray-500 mt-1"></p>
+                </div>
+
+            </div>
+            <div class="mt-6 flex justify-end gap-4">
+                <button type="button" id="cancel-colaborador-modal" class="px-4 py-2 bg-gray-200 rounded-lg">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-orange-500 text-white rounded-lg">Salvar</button>
+            </div>
+        </form>
+        <style>.form-input { appearance: none; background-color: #f9fafb; border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.5rem 0.75rem; width: 100%; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); } .form-input:focus { outline: 2px solid transparent; outline-offset: 2px; border-color: #f97316; box-shadow: 0 0 0 2px #fb923c; }</style>
+    </div>
+    
+    <!-- Modal para Escala -->
+    <div id="escala-modal-backdrop" class="modal-backdrop"></div>
+    <div id="escala-modal" class="modal bg-white rounded-lg shadow-xl w-full max-w-3xl">
+         <div class="p-6 border-b"><h3 id="escala-modal-title" class="text-xl font-semibold">Escala Semanal</h3></div>
+         <div class="p-6">
+            <p class="mb-4">Defina os horários para <strong id="escala-colaborador-nome"></strong>:</p>
+            <div class="grid grid-cols-7 gap-2 text-center text-sm">
+                <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+                <!-- Inputs for schedule -->
+                <input type="text" placeholder="Folga" class="form-input text-center">
+                <input type="text" placeholder="08h-18h" class="form-input text-center">
+                <input type="text" placeholder="08h-18h" class="form-input text-center">
+                <input type="text" placeholder="08h-18h" class="form-input text-center">
+                <input type="text" placeholder="08h-18h" class="form-input text-center">
+                <input type="text" placeholder="08h-18h" class="form-input text-center">
+                <input type="text" placeholder="Folga" class="form-input text-center">
+            </div>
+            <div class="mt-6 flex justify-end gap-4">
+                <button type="button" id="cancel-escala-modal" class="px-4 py-2 bg-gray-200 rounded-lg">Fechar</button>
+            </div>
+         </div>
+    </div>
+
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+        
+        // ====================================================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDJEFwpP0GuuBugz4KFgzwdJTlhXS3H7w8",
+            authDomain: "confyn-47447.firebaseapp.com",
+            projectId: "confyn-47447",
+            storageBucket: "confyn-47447.firebasestorage.app",
+            messagingSenderId: "292650745185",
+            appId: "1:292650745185:web:2e1555246eb1b14c115920"
+        };
+        // ====================================================================================
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // --- AUTH & SECURITY ---
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                const userName = user.email.split('@')[0];
+                document.getElementById('user-name').textContent = userName;
+                document.getElementById('user-initials').textContent = userName.substring(0, 2).toUpperCase();
+                fetchColaboradores();
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+        document.getElementById('logout-button').addEventListener('click', () => signOut(auth));
+
+        // --- GLOBAL STATE ---
+        let allColaboradores = [];
+        let filteredColaboradores = [];
+        let currentPage = 1;
+        const itemsPerPage = 5;
+        
+        // --- DATA FETCHING ---
+        async function fetchColaboradores() {
+            try {
+                const q = query(collection(db, "colaboradores"), orderBy("nome"));
+                const snapshot = await getDocs(q);
+                allColaboradores = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                applyFiltersAndSearch();
+                checkBirthdays();
+            } catch (error) { console.error("Erro ao buscar colaboradores: ", error); }
+        }
+
+        // --- MODAL COLABORADOR ---
+        const colaboradorModal = document.getElementById('colaborador-modal');
+        const colaboradorModalBackdrop = document.getElementById('colaborador-modal-backdrop');
+        const colaboradorForm = document.getElementById('colaborador-form');
+
+        const openColaboradorModal = (colaborador = null) => {
+            colaboradorForm.reset();
+            document.getElementById('colaborador-id').value = '';
+            document.getElementById('profile-pic-preview').src = 'https://placehold.co/128x128/e2e8f0/475569?text=Foto';
+            ['cpf-error', 'rg-error', 'email-error'].forEach(id => document.getElementById(id).classList.add('hidden'));
+
+            if (colaborador) {
+                document.getElementById('colaborador-modal-title').textContent = 'Editar Colaborador';
+                document.getElementById('colaborador-id').value = colaborador.id;
+                if(colaborador.fotoUrl) document.getElementById('profile-pic-preview').src = colaborador.fotoUrl;
+                // Populate all fields
+                Object.keys(colaborador).forEach(key => {
+                    const el = document.getElementById(`colaborador-${key}`);
+                    if (el) el.value = colaborador[key];
+                });
+            } else {
+                document.getElementById('colaborador-modal-title').textContent = 'Adicionar Colaborador';
+            }
+            colaboradorModal.style.display = 'block';
+            colaboradorModalBackdrop.style.display = 'block';
+        }
+        const closeColaboradorModal = () => {
+            colaboradorModal.style.display = 'none';
+            colaboradorModalBackdrop.style.display = 'none';
+        }
+        
+        document.getElementById('add-colaborador-button').addEventListener('click', () => openColaboradorModal());
+        document.getElementById('cancel-colaborador-modal').addEventListener('click', closeColaboradorModal);
+        document.getElementById('change-pic-button').addEventListener('click', () => document.getElementById('profile-pic-upload').click());
+        document.getElementById('profile-pic-upload').addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (event) => { document.getElementById('profile-pic-preview').src = event.target.result; }
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+
+        // --- MODAL ESCALA ---
+        const escalaModal = document.getElementById('escala-modal');
+        const escalaModalBackdrop = document.getElementById('escala-modal-backdrop');
+        window.openEscalaModal = (colaboradorId) => {
+            const colaborador = allColaboradores.find(c => c.id === colaboradorId);
+            if (!colaborador) return;
+            document.getElementById('escala-colaborador-nome').textContent = colaborador.nome;
+            // Here you would load and save the schedule, for now it's just a display
+            escalaModal.style.display = 'block';
+            escalaModalBackdrop.style.display = 'block';
+        }
+        const closeEscalaModal = () => {
+            escalaModal.style.display = 'none';
+            escalaModalBackdrop.style.display = 'none';
+        }
+        document.getElementById('cancel-escala-modal').addEventListener('click', closeEscalaModal);
+
+
+        // --- FORM SUBMISSION & CRUD ---
+        colaboradorForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const colaboradorId = document.getElementById('colaborador-id').value;
+            const cpf = document.getElementById('colaborador-cpf').value;
+            const rg = document.getElementById('colaborador-rg').value;
+            const email = document.getElementById('colaborador-email').value;
+
+            // Uniqueness checks
+            for(let field of ['cpf', 'rg', 'email']) {
+                const value = document.getElementById(`colaborador-${field}`).value;
+                const errorEl = document.getElementById(`${field}-error`);
+                if(value) {
+                    const isUnique = await checkUniqueness(field, value, colaboradorId);
+                    if(!isUnique) {
+                        errorEl.textContent = `${field.toUpperCase()} já cadastrado.`;
+                        errorEl.classList.remove('hidden');
+                        return;
+                    }
+                }
+                errorEl.classList.add('hidden');
+            }
+            
+            let colaboradorData = {};
+            new FormData(colaboradorForm).forEach((value, key) => {
+                const id = key.replace('colaborador-', '');
+                colaboradorData[id] = value;
+            });
+            colaboradorData.salario = parseFloat(document.getElementById('colaborador-salario').value.replace(/\./g, '').replace(',', '.'));
+            
+            try {
+                // Handle file uploads
+                const picFile = document.getElementById('profile-pic-upload').files[0];
+                if(picFile) {
+                    const storageRef = ref(storage, `fotos_perfil/${Date.now()}_${picFile.name}`);
+                    await uploadBytes(storageRef, picFile);
+                    colaboradorData.fotoUrl = await getDownloadURL(storageRef);
+                }
+                
+                if (colaboradorId) {
+                    await updateDoc(doc(db, "colaboradores", colaboradorId), colaboradorData);
+                } else {
+                    await addDoc(collection(db, "colaboradores"), colaboradorData);
+                }
+                closeColaboradorModal();
+                fetchColaboradores();
+            } catch(error) {
+                console.error("Erro ao salvar colaborador:", error);
+            }
+        });
+
+        async function checkUniqueness(field, value, currentId = null) {
+            const q = query(collection(db, "colaboradores"), where(field, "==", value));
+            const snapshot = await getDocs(q);
+            if (snapshot.empty) return true;
+            if (currentId && snapshot.docs[0].id === currentId) return true;
+            return false;
+        }
+
+        window.deleteColaborador = async (id) => {
+            if (confirm('Tem certeza?')) {
+                await deleteDoc(doc(db, "colaboradores", id));
+                fetchColaboradores();
+            }
+        }
+        window.editColaborador = (id) => {
+             const colaborador = allColaboradores.find(c => c.id === id);
+             if (colaborador) openColaboradorModal(colaborador);
+        }
+
+        // --- FILTERS, DISPLAY, PAGINATION ---
+        function applyFiltersAndSearch() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            filteredColaboradores = allColaboradores.filter(c => 
+                !searchTerm ||
+                c.nome.toLowerCase().includes(searchTerm) ||
+                (c.cpf && c.cpf.toLowerCase().includes(searchTerm))
+            );
+            currentPage = 1;
+            displayColaboradores();
+            updateStats();
+        }
+
+        function displayColaboradores() {
+            const tableBody = document.getElementById('colaboradores-table-body');
+            tableBody.innerHTML = '';
+             if (filteredColaboradores.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="5" class="text-center p-8">Nenhum colaborador encontrado.</td></tr>`;
+                updatePaginationControls();
+                return;
+            }
+            const paginated = filteredColaboradores.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+            paginated.forEach(c => {
+                const statusClass = c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800';
+                tableBody.innerHTML += `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-4 font-medium flex items-center gap-3"><img src="${c.fotoUrl || 'https://placehold.co/40x40/e2e8f0/475569?text=??'}" class="w-10 h-10 rounded-full object-cover">${c.nome}</td>
+                        <td class="p-4">${c.cargo}</td>
+                        <td class="p-4">${c.email}</td>
+                        <td class="p-4"><span class="px-2 py-1 text-xs font-semibold rounded-full ${statusClass}">${c.status}</span></td>
+                        <td class="p-4 flex gap-3 text-gray-500">
+                            <ion-icon name="calendar-outline" onclick="openEscalaModal('${c.id}')" class="cursor-pointer text-xl hover:text-purple-600" title="Ver Escala"></ion-icon>
+                            <ion-icon name="create-outline" onclick="editColaborador('${c.id}')" class="cursor-pointer text-xl hover:text-blue-600" title="Editar"></ion-icon>
+                            <ion-icon name="trash-outline" onclick="deleteColaborador('${c.id}')" class="cursor-pointer text-xl hover:text-red-600" title="Excluir"></ion-icon>
+                        </td>
+                    </tr>`;
+            });
+            updatePaginationControls();
+        }
+        
+        function updateStats() {
+            document.getElementById('total-colaboradores').textContent = allColaboradores.length;
+            document.getElementById('instrutores-ativos').textContent = allColaboradores.filter(c => c.status === 'Ativo' && c.cargo && c.cargo.toLowerCase().includes('instrutor')).length;
+            document.getElementById('administrativo-total').textContent = allColaboradores.filter(c => c.cargo && c.cargo.toLowerCase().includes('admin')).length;
+        }
+
+        function updatePaginationControls() {
+            const totalPages = Math.ceil(filteredColaboradores.length / itemsPerPage);
+            document.getElementById('pagination-info').textContent = `Mostrando ${filteredColaboradores.length > 0 ? (currentPage-1)*itemsPerPage+1 : 0}-${Math.min(currentPage*itemsPerPage, filteredColaboradores.length)} de ${filteredColaboradores.length} colaboradores`;
+            document.getElementById('prev-page-button').disabled = currentPage === 1;
+            document.getElementById('next-page-button').disabled = currentPage === totalPages || totalPages === 0;
+        }
+        
+        document.getElementById('search-input').addEventListener('input', applyFiltersAndSearch);
+        document.getElementById('prev-page-button').addEventListener('click', () => { if (currentPage > 1) { currentPage--; displayColaboradores(); }});
+        document.getElementById('next-page-button').addEventListener('click', () => { if (currentPage < Math.ceil(filteredColaboradores.length / itemsPerPage)) { currentPage++; displayColaboradores(); }});
+
+        // --- HELPERS (FORMATTING, BIRTHDAY, ETC) ---
+        function checkBirthdays() {
+            const currentMonth = new Date().getMonth() + 1;
+            const birthdayPeople = allColaboradores.filter(c => {
+                if (!c.nascimento) return false;
+                const birthMonth = new Date(c.nascimento).getMonth() + 1;
+                return birthMonth === currentMonth;
+            });
+            if (birthdayPeople.length > 0) {
+                document.getElementById('birthday-notification').classList.remove('hidden');
+                document.getElementById('birthday-names').textContent = `Aniversariantes: ${birthdayPeople.map(p => p.nome.split(' ')[0]).join(', ')}. Não se esqueça de parabenizá-los!`;
+            }
+        }
+
+        const formatCPF = (e) => { let v = e.target.value.replace(/\D/g,''); v=v.replace(/(\d{3})(\d)/,"$1.$2"); v=v.replace(/(\d{3})(\d)/,"$1.$2"); v=v.replace(/(\d{3})(\d{1,2})$/,"$1-$2"); e.target.value = v.substring(0, 14); };
+        const formatPhone = (e) => { let v = e.target.value.replace(/\D/g,''); v=v.replace(/^(\d{2})(\d)/g,"($1) $2"); v=v.replace(/(\d)(\d{4})$/,"$1-$2"); e.target.value = v.substring(0, 15); };
+        const formatCurrency = (e) => { let v = e.target.value.replace(/\D/g,''); v = (v/100).toFixed(2) + ''; v = v.replace(".", ","); v = v.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.'); e.target.value = v; };
+
+        document.getElementById('colaborador-cpf').addEventListener('input', formatCPF);
+        document.getElementById('colaborador-telefone').addEventListener('input', formatPhone);
+        document.getElementById('colaborador-salario').addEventListener('input', formatCurrency);
+        document.getElementById('buscar-cep').addEventListener('click', async () => {
+             const cep = document.getElementById('colaborador-cep').value.replace(/\D/g, '');
+             if (cep.length !== 8) return;
+             const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+             const data = await response.json();
+             if(!data.erro) {
+                document.getElementById('colaborador-rua').value = data.logradouro;
+                document.getElementById('colaborador-bairro').value = data.bairro;
+                document.getElementById('colaborador-cidade').value = data.localidade;
+             }
+        });
+
+    </script>
 </body>
 </html>
 
