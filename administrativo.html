@@ -157,7 +157,7 @@
     <div id="usuarios-modal-backdrop" class="modal-backdrop"></div>
     <div id="usuarios-modal" class="modal bg-white rounded-lg shadow-xl w-full max-w-3xl">
          <div class="p-6 border-b flex justify-between items-center"><h3 class="text-xl font-semibold">Gerenciar Usuários</h3><button id="close-usuarios-modal" class="text-2xl">&times;</button></div>
-         <div class="p-6">
+         <div class="p-6 max-h-[80vh] overflow-y-auto">
              <form id="usuario-form" class="mb-6">
                  <h4 class="font-semibold mb-2">Convidar Novo Usuário</h4>
                  <div class="flex items-start gap-4">
@@ -180,15 +180,32 @@
          </div>
     </div>
     
-    <!-- Outros modals (cursos, documentos, etc) serão adicionados aqui -->
+    <!-- Modal para Gerenciar Cursos -->
+    <div id="cursos-modal-backdrop" class="modal-backdrop"></div>
+    <div id="cursos-modal" class="modal bg-white rounded-lg shadow-xl w-full max-w-2xl">
+        <div class="p-6 border-b flex justify-between items-center">
+            <h3 class="text-xl font-semibold text-gray-800">Gerenciar Cursos</h3>
+            <button id="close-cursos-modal" class="text-2xl text-gray-500 hover:text-gray-800">&times;</button>
+        </div>
+        <div class="p-6">
+            <form id="curso-form" class="flex gap-4 mb-6">
+                <input type="hidden" id="curso-id">
+                <input type="text" id="curso-nome" placeholder="Nome do novo curso" class="form-input flex-grow" required>
+                <button type="submit" class="px-4 py-2 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600">Salvar</button>
+                <button type="button" id="cancel-edit-curso" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 hidden">Cancelar</button>
+            </form>
+            <div id="cursos-list" class="space-y-2 max-h-80 overflow-y-auto"></div>
+        </div>
+    </div>
 
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, collection, getDocs, doc, deleteDoc, query, orderBy, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, deleteDoc, query, orderBy, setDoc, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         // ====================================================================================
+        // !! IMPORTANTE !! COLE AQUI A CONFIGURAÇÃO DO SEU FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyDJEFwpP0GuuBugz4KFgzwdJTlhXS3H7w8",
             authDomain: "confyn-47447.firebaseapp.com",
@@ -231,8 +248,8 @@
 
         const openUsuariosModal = async () => {
             populatePermissionsCheckboxes();
-            await fetchUsuarios(); // Pega emails de usuários existentes primeiro
-            await fetchColaboradores(); // Pega todos os colaboradores
+            await fetchUsuarios(); 
+            await fetchColaboradores();
             usuariosModal.style.display = 'block';
             usuariosModalBackdrop.style.display = 'block';
         };
@@ -261,7 +278,7 @@
             
             const filtered = allColaboradores.filter(c => 
                 c.nome.toLowerCase().includes(searchTerm) && 
-                !existingUsersEmails.includes(c.email) // Mostra apenas quem AINDA NÃO é usuário
+                !existingUsersEmails.includes(c.email)
             );
 
             if (filtered.length > 0) {
@@ -274,7 +291,8 @@
                 });
                 searchResultsContainer.classList.remove('hidden');
             } else {
-                searchResultsContainer.classList.add('hidden');
+                searchResultsContainer.innerHTML = `<div class="p-2 text-gray-500">Nenhum colaborador encontrado.</div>`;
+                searchResultsContainer.classList.remove('hidden');
             }
         });
 
@@ -293,6 +311,7 @@
             document.getElementById('clear-selection').onclick = () => {
                 emailInputHidden.value = '';
                 selectedContainer.classList.add('hidden');
+                colaboradorSearchInput.value = '';
             };
         }
         
@@ -316,10 +335,13 @@
                 const snapshot = await getDocs(collection(db, "usuarios"));
                 listContainer.innerHTML = '';
                 existingUsersEmails = [];
+                if(snapshot.empty) {
+                    listContainer.innerHTML = '<p class="text-gray-500">Nenhum usuário com permissão cadastrado.</p>';
+                }
                 snapshot.forEach(doc => {
                     const user = { id: doc.id, ...doc.data() };
                     existingUsersEmails.push(user.email);
-                    const userPermissions = menuItems.filter(menu => user.permissoes[menu]).join(', ');
+                    const userPermissions = menuItems.filter(menu => user.permissoes[menu]).join(', ') || 'Nenhuma';
                     listContainer.innerHTML += `
                         <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border">
                             <div>
@@ -345,8 +367,8 @@
             }
 
             const permissoes = {};
-            document.querySelectorAll('input[name="permissao"]:checked').forEach(checkbox => {
-                permissoes[checkbox.value] = true;
+            document.querySelectorAll('input[name="permissao"]').forEach(checkbox => {
+                permissoes[checkbox.value] = checkbox.checked;
             });
             
             try {
@@ -357,6 +379,7 @@
                 usuarioForm.reset();
                 selectedContainer.classList.add('hidden');
                 emailInputHidden.value = '';
+                document.querySelectorAll('input[name="permissao"]').forEach(c => c.checked = false);
                 fetchUsuarios();
             } catch (error) {
                 console.error("Erro ao convidar usuário:", error);
@@ -373,10 +396,110 @@
             }
         }
         
-        // --- CÓDIGO PARA OS OUTROS MODAIS (CURSOS, DOCUMENTOS, ETC.) SERIA ADICIONADO AQUI ---
+        // --- MODAL CURSOS ---
+        const cursosModal = document.getElementById('cursos-modal');
+        const cursosModalBackdrop = document.getElementById('cursos-modal-backdrop');
+        const cursoForm = document.getElementById('curso-form');
+        const cursoNomeInput = document.getElementById('curso-nome');
+        const cursoIdInput = document.getElementById('curso-id');
+        const cancelEditButton = document.getElementById('cancel-edit-curso');
+        
+        const openCursosModal = () => {
+            fetchCursos();
+            cursosModal.style.display = 'block';
+            cursosModalBackdrop.style.display = 'block';
+        };
+        const closeCursosModal = () => {
+            cursoForm.reset();
+            cursoIdInput.value = '';
+            cancelEditButton.classList.add('hidden');
+            cursosModal.style.display = 'none';
+            cursosModalBackdrop.style.display = 'none';
+        };
+
+        document.getElementById('gerenciar-cursos-card').addEventListener('click', openCursosModal);
+        document.getElementById('close-cursos-modal').addEventListener('click', closeCursosModal);
+        
+        cancelEditButton.addEventListener('click', () => {
+            cursoForm.reset();
+            cursoIdInput.value = '';
+            cancelEditButton.classList.add('hidden');
+        });
+
+        async function fetchCursos() {
+            const cursosListContainer = document.getElementById('cursos-list');
+            cursosListContainer.innerHTML = '<p>Carregando cursos...</p>';
+            
+            try {
+                const q = query(collection(db, "cursos"), orderBy("nome"));
+                const querySnapshot = await getDocs(q);
+                
+                if (querySnapshot.empty) {
+                    cursosListContainer.innerHTML = '<p class="text-gray-500">Nenhum curso cadastrado.</p>';
+                    return;
+                }
+
+                cursosListContainer.innerHTML = '';
+                querySnapshot.forEach((doc) => {
+                    const curso = { id: doc.id, ...doc.data() };
+                    const cursoDiv = document.createElement('div');
+                    cursoDiv.className = 'flex justify-between items-center p-3 bg-gray-50 rounded-lg border';
+                    cursoDiv.innerHTML = `
+                        <span class="text-gray-800">${curso.nome}</span>
+                        <div class="flex gap-3">
+                            <button onclick="window.editCurso('${curso.id}', '${curso.nome}')" class="text-blue-600 hover:text-blue-800"><ion-icon name="create-outline"></ion-icon></button>
+                            <button onclick="window.deleteCurso('${curso.id}')" class="text-red-600 hover:text-red-800"><ion-icon name="trash-outline"></ion-icon></button>
+                        </div>
+                    `;
+                    cursosListContainer.appendChild(cursoDiv);
+                });
+            } catch (error) {
+                console.error("Erro ao buscar cursos: ", error);
+                cursosListContainer.innerHTML = '<p class="text-red-500">Erro ao carregar cursos.</p>';
+            }
+        }
+
+        cursoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const cursoNome = cursoNomeInput.value.trim();
+            const cursoId = cursoIdInput.value;
+
+            if (!cursoNome) return;
+
+            try {
+                if (cursoId) { // Editando
+                    await updateDoc(doc(db, "cursos", cursoId), { nome: cursoNome });
+                } else { // Adicionando
+                    await addDoc(collection(db, "cursos"), { nome: cursoNome });
+                }
+                cursoForm.reset();
+                cursoIdInput.value = '';
+                cancelEditButton.classList.add('hidden');
+                fetchCursos();
+            } catch (error) {
+                console.error("Erro ao salvar curso: ", error);
+            }
+        });
+        
+        window.editCurso = (id, nome) => {
+            cursoIdInput.value = id;
+            cursoNomeInput.value = nome;
+            cursoNomeInput.focus();
+            cancelEditButton.classList.remove('hidden');
+        };
+
+        window.deleteCurso = async (id) => {
+            if (confirm('Tem certeza que deseja excluir este curso? Esta ação não pode ser desfeita.')) {
+                try {
+                    await deleteDoc(doc(db, "cursos", id));
+                    fetchCursos();
+                } catch (error) {
+                    console.error("Erro ao excluir curso: ", error);
+                }
+            }
+        };
 
     </script>
 </body>
 </html>
-
 
