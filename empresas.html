@@ -341,8 +341,119 @@
 
         tabGeral.addEventListener('click', (e) => { e.preventDefault(); switchTab('geral'); });
         tabHistorico.addEventListener('click', (e) => { e.preventDefault(); switchTab('historico'); });
+        
+        // --- MODAL, FORMATAÇÃO, VALIDAÇÕES E CRUD ---
+        const modal = document.getElementById('company-modal');
+        const modalBackdrop = document.getElementById('company-modal-backdrop');
+        const companyForm = document.getElementById('company-form');
+        const telefoneInput = document.getElementById('telefone');
 
-        // --- (código dos modais, formatação, validações e CRUD permanece o mesmo) ---
+        const openModal = (company = null) => {
+            companyForm.reset();
+            document.getElementById('company-id').value = '';
+            ['cnpj-error', 'email-error', 'telefone-error'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            
+            if (company) {
+                document.getElementById('modal-title').textContent = 'Editar Empresa';
+                document.getElementById('company-id').value = company.id;
+                Object.keys(company).forEach(key => {
+                    const el = document.getElementById(key) || document.getElementById(`modal-${key}`);
+                    if(el) el.value = company[key];
+                });
+            } else {
+                document.getElementById('modal-title').textContent = 'Adicionar Nova Empresa';
+            }
+            modal.style.display = 'block';
+            modalBackdrop.style.display = 'block';
+        };
+
+        const closeModal = () => {
+            modal.style.display = 'none';
+            modalBackdrop.style.display = 'none';
+        };
+
+        document.getElementById('add-company-button').addEventListener('click', () => openModal());
+        document.getElementById('cancel-modal-button').addEventListener('click', closeModal);
+        modalBackdrop.addEventListener('click', closeModal);
+
+        const formatarTelefone = (event) => {
+            let value = event.target.value.replace(/\D/g, '').substring(0, 11);
+            if (value.length > 6) value = `(${value.substring(0, 2)}) ${value.substring(2, 7)}-${value.substring(7)}`;
+            else if (value.length > 2) value = `(${value.substring(0, 2)}) ${value.substring(2)}`;
+            else if (value.length > 0) value = `(${value}`;
+            event.target.value = value;
+        };
+        telefoneInput.addEventListener('input', formatarTelefone);
+
+        async function checkUniqueness(field, value, currentId = null) {
+            const q = query(collection(db, "empresas"), where(field, "==", value));
+            const snapshot = await getDocs(q);
+            if (snapshot.empty) return true;
+            if (currentId && snapshot.docs[0].id === currentId) return true;
+            return false;
+        }
+
+        async function fetchCompanies() {
+            try {
+                const q = query(collection(db, "empresas"), orderBy("nome"));
+                const snapshot = await getDocs(q);
+                allCompanies = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                updateFiltersAndDisplay();
+                updateStats();
+                populateCityFilter();
+            } catch (error) { console.error("Erro ao buscar empresas: ", error); }
+        }
+
+        companyForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const companyId = document.getElementById('company-id').value;
+            let isValid = true;
+            
+            // Validações
+            for (let field of ['cnpj', 'email', 'telefone']) {
+                const input = document.getElementById(field);
+                const errorEl = document.getElementById(`${field}-error`);
+                const isUnique = await checkUniqueness(field, input.value, companyId);
+                if (!isUnique) {
+                    errorEl.textContent = `${field.charAt(0).toUpperCase() + field.slice(1)} já cadastrado.`;
+                    errorEl.classList.remove('hidden');
+                    isValid = false;
+                } else {
+                    errorEl.classList.add('hidden');
+                }
+            }
+
+            if (!isValid) return;
+
+            const companyData = {
+                cnpj: document.getElementById('cnpj').value,
+                nome: document.getElementById('nome').value,
+                contato: document.getElementById('contato').value,
+                telefone: document.getElementById('telefone').value,
+                email: document.getElementById('email').value,
+                cidade: document.getElementById('cidade').value,
+                status: document.getElementById('modal-status').value,
+            };
+
+            try {
+                if (companyId) await updateDoc(doc(db, "empresas", companyId), companyData);
+                else await addDoc(collection(db, "empresas"), companyData);
+                closeModal();
+                fetchCompanies();
+            } catch (error) { console.error("Erro ao salvar empresa: ", error); }
+        });
+
+        window.editCompany = (id) => {
+            const company = allCompanies.find(c => c.id === id);
+            if(company) openModal(company);
+        };
+        
+        window.deleteCompany = async (id) => {
+            if (confirm('Tem certeza?')) {
+                await deleteDoc(doc(db, "empresas", id));
+                fetchCompanies();
+            }
+        };
 
         // --- COMPANY HISTORY ---
         async function fetchCompanyHistory(companyId) {
@@ -362,15 +473,7 @@
                     const turma = doc.data();
                     const dataTurma = turma.data ? turma.data.toDate().toLocaleDateString('pt-BR') : 'N/A';
                     const numAlunos = turma.alunos ? turma.alunos.length : 0;
-
-                    historyBody.innerHTML += `
-                        <tr class="border-b">
-                            <td class="p-4 font-medium">${turma.cursoNome}</td>
-                            <td class="p-4">${dataTurma}</td>
-                            <td class="p-4">${numAlunos}</td>
-                            <td class="p-4">${turma.status}</td>
-                        </tr>
-                    `;
+                    historyBody.innerHTML += `<tr class="border-b"><td class="p-4 font-medium">${turma.cursoNome}</td><td class="p-4">${dataTurma}</td><td class="p-4">${numAlunos}</td><td class="p-4">${turma.status}</td></tr>`;
                 });
 
             } catch(error) {
@@ -381,9 +484,7 @@
         
         window.viewCompanyDetails = (companyId) => {
             const company = allCompanies.find(c => c.id === companyId);
-            if (company) {
-                showDetailsView(company);
-            }
+            if (company) showDetailsView(company);
         };
         
         function displayCompanies() {
@@ -405,8 +506,7 @@
                     case 'Inativa': statusClass = 'bg-gray-100 text-gray-800'; break;
                     case 'Potencial Cliente': statusClass = 'bg-blue-100 text-blue-800'; break;
                 }
-
-                const row = `
+                tableBody.innerHTML += `
                     <tr class="border-b hover:bg-gray-50">
                         <td class="p-4 font-medium text-gray-900">${company.nome}</td>
                         <td class="p-4">${company.cnpj}</td>
@@ -418,15 +518,99 @@
                             <ion-icon onclick="editCompany('${company.id}')" name="create-outline" class="text-lg cursor-pointer hover:text-blue-600" title="Editar"></ion-icon>
                             <ion-icon onclick="deleteCompany('${company.id}')" name="trash-outline" class="text-lg cursor-pointer hover:text-red-600" title="Excluir"></ion-icon>
                         </td>
-                    </tr>
-                `;
-                tableBody.innerHTML += row;
+                    </tr>`;
             });
-
             updatePaginationControls();
         }
 
-        // --- (Restante do JavaScript, como paginação, stats, PDF, etc., permanece o mesmo) ---
+        // --- FILTROS, PAGINAÇÃO, STATS, PDF ---
+        function applyFiltersAndSearch() {
+            const status = document.getElementById('status-filter').value;
+            const city = document.getElementById('city-filter').value;
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            
+            filteredCompanies = allCompanies.filter(company => {
+                const statusMatch = status === 'Todos' || company.status === status;
+                const cityMatch = city === 'Todas' || company.cidade === city;
+                const searchMatch = !searchTerm ||
+                    company.nome.toLowerCase().includes(searchTerm) ||
+                    company.cnpj.toLowerCase().includes(searchTerm) ||
+                    company.email.toLowerCase().includes(searchTerm) ||
+                    company.telefone.toLowerCase().includes(searchTerm);
+                return statusMatch && cityMatch && searchMatch;
+            });
+            currentPage = 1;
+            displayCompanies();
+        }
+
+        function updatePaginationControls() {
+            const totalPages = Math.ceil(filteredCompanies.length / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage + 1;
+            const endIndex = Math.min(startIndex + itemsPerPage - 1, filteredCompanies.length);
+            
+            document.getElementById('pagination-info').textContent = `Mostrando ${filteredCompanies.length > 0 ? startIndex : 0}-${endIndex} de ${filteredCompanies.length} empresas`;
+            document.getElementById('prev-page-button').disabled = currentPage === 1;
+            document.getElementById('next-page-button').disabled = currentPage === totalPages || totalPages === 0;
+        }
+
+        function updateFiltersAndDisplay() {
+            applyFiltersAndSearch();
+        }
+        
+        document.getElementById('apply-filters-button').addEventListener('click', updateFiltersAndDisplay);
+        document.getElementById('clear-filters-button').addEventListener('click', () => {
+            document.getElementById('status-filter').value = 'Todos';
+            document.getElementById('city-filter').value = 'Todas';
+            document.getElementById('search-input').value = '';
+            updateFiltersAndDisplay();
+        });
+        document.getElementById('search-input').addEventListener('input', updateFiltersAndDisplay);
+        document.getElementById('prev-page-button').addEventListener('click', () => { if (currentPage > 1) { currentPage--; displayCompanies(); }});
+        document.getElementById('next-page-button').addEventListener('click', () => { const totalPages = Math.ceil(filteredCompanies.length / itemsPerPage); if (currentPage < totalPages) { currentPage++; displayCompanies(); }});
+
+        function populateCityFilter() {
+            const cityFilter = document.getElementById('city-filter');
+            const cities = [...new Set(allCompanies.map(c => c.cidade))].sort();
+            cityFilter.innerHTML = '<option value="Todas">Todas</option>'; 
+            cities.forEach(city => cityFilter.innerHTML += `<option value="${city}">${city}</option>`);
+        }
+        
+        function updateStats() {
+            document.getElementById('total-clientes').textContent = allCompanies.length;
+            document.getElementById('clientes-ativos').textContent = allCompanies.filter(c => c.status === 'Ativa').length;
+            document.getElementById('clientes-inativos').textContent = allCompanies.filter(c => c.status === 'Inativa').length;
+            document.getElementById('potenciais-clientes').textContent = allCompanies.filter(c => c.status === 'Potencial Cliente').length;
+        }
+        
+        document.getElementById('download-report-button').addEventListener('click', () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(20);
+            doc.setTextColor('#2c3e50');
+            doc.text("Relatório de Empresas - CONFYN", 14, 22);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            doc.text(`Filtros Aplicados: Status (${document.getElementById('status-filter').value}), Cidade (${document.getElementById('city-filter').value})`, 14, 30);
+            doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, 35);
+
+            const tableData = filteredCompanies.map(c => [ c.nome, c.cnpj, c.contato, c.cidade, c.status ]);
+            doc.autoTable({
+                startY: 45,
+                head: [['Nome da Empresa', 'CNPJ', 'Contato', 'Cidade', 'Status']],
+                body: tableData,
+                theme: 'grid',
+                headStyles: { fillColor: '#f97316' },
+                styles: { font: 'helvetica', fontSize: 9 },
+                didDrawPage: (data) => {
+                    doc.setFontSize(8);
+                    doc.text('Página ' + doc.internal.getNumberOfPages(), data.settings.margin.left, doc.internal.pageSize.height - 10);
+                }
+            });
+            doc.save('Relatorio_Empresas_CONFYN.pdf');
+        });
+
     </script>
 </body>
 </html>
