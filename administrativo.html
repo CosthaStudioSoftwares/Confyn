@@ -41,6 +41,15 @@
             transform: translate(-50%, -50%);
             z-index: 50;
         }
+        .form-input { 
+            appearance: none; background-color: #f9fafb; border: 1px solid #d1d5db; 
+            border-radius: 0.375rem; padding: 0.5rem 0.75rem; width: 100%; 
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); 
+        }
+        .form-input:focus { 
+            outline: 2px solid transparent; outline-offset: 2px; border-color: #f97316; 
+            box-shadow: 0 0 0 2px #fb923c; 
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -114,36 +123,27 @@
                 <h2 class="text-2xl font-semibold text-gray-700 mb-6">Painel de Controle</h2>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Gerenciamento de Usuários -->
-                    <div class="bg-white p-6 rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer">
+                    <div id="gerenciar-usuarios-card" class="bg-white p-6 rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer">
                         <ion-icon name="people-circle-outline" class="text-4xl text-orange-500 mb-4"></ion-icon>
                         <h3 class="text-lg font-bold text-gray-800">Gerenciar Usuários</h3>
                         <p class="text-sm text-gray-500 mt-1">Adicione, edite e defina permissões para os usuários do sistema.</p>
                     </div>
-
-                    <!-- Gerenciar Cursos -->
                     <div id="gerenciar-cursos-card" class="bg-white p-6 rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer">
                         <ion-icon name="school-outline" class="text-4xl text-orange-500 mb-4"></ion-icon>
                         <h3 class="text-lg font-bold text-gray-800">Gerenciar Cursos</h3>
                         <p class="text-sm text-gray-500 mt-1">Adicione, edite ou remova os cursos disponíveis para as turmas.</p>
                     </div>
-
-                    <!-- Biblioteca de Documentos -->
-                    <div class="bg-white p-6 rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer">
+                    <div id="gerenciar-documentos-card" class="bg-white p-6 rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer">
                         <ion-icon name="folder-open-outline" class="text-4xl text-orange-500 mb-4"></ion-icon>
                         <h3 class="text-lg font-bold text-gray-800">Biblioteca de Documentos</h3>
                         <p class="text-sm text-gray-500 mt-1">Centralize NRs, materiais de apoio e outros documentos importantes.</p>
                     </div>
-                    
-                    <!-- Modelos e Processos -->
-                    <div class="bg-white p-6 rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer">
+                    <div id="gerenciar-processos-card" class="bg-white p-6 rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer">
                         <ion-icon name="checkbox-outline" class="text-4xl text-orange-500 mb-4"></ion-icon>
                         <h3 class="text-lg font-bold text-gray-800">Modelos e Processos</h3>
                         <p class="text-sm text-gray-500 mt-1">Crie e gerencie checklists e procedimentos padronizados.</p>
                     </div>
-
-                    <!-- Configurações do Sistema -->
-                     <div class="bg-white p-6 rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer">
+                     <div id="gerenciar-configuracoes-card" class="bg-white p-6 rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer">
                         <ion-icon name="cog-outline" class="text-4xl text-orange-500 mb-4"></ion-icon>
                         <h3 class="text-lg font-bold text-gray-800">Configurações do Sistema</h3>
                         <p class="text-sm text-gray-500 mt-1">Ajustes gerais, informações da empresa e outras configurações.</p>
@@ -153,41 +153,49 @@
         </div>
     </div>
     
-    <!-- Modal para Gerenciar Cursos -->
-    <div id="cursos-modal-backdrop" class="modal-backdrop"></div>
-    <div id="cursos-modal" class="modal bg-white rounded-lg shadow-xl w-full max-w-2xl">
-        <div class="p-6 border-b flex justify-between items-center">
-            <h3 class="text-xl font-semibold text-gray-800">Gerenciar Cursos</h3>
-            <button id="close-cursos-modal" class="text-2xl text-gray-500 hover:text-gray-800">&times;</button>
-        </div>
-        <div class="p-6">
-            <form id="curso-form" class="flex gap-4 mb-6">
-                <input type="hidden" id="curso-id">
-                <input type="text" id="curso-nome" placeholder="Nome do novo curso" class="flex-grow px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500" required>
-                <button type="submit" class="px-4 py-2 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600">Salvar</button>
-                <button type="button" id="cancel-edit-curso" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 hidden">Cancelar</button>
-            </form>
-            <div id="cursos-list" class="space-y-2 max-h-80 overflow-y-auto">
-                <!-- Lista de cursos será inserida aqui -->
-            </div>
-        </div>
+    <!-- Modal para Gerenciar Usuários -->
+    <div id="usuarios-modal-backdrop" class="modal-backdrop"></div>
+    <div id="usuarios-modal" class="modal bg-white rounded-lg shadow-xl w-full max-w-3xl">
+         <div class="p-6 border-b flex justify-between items-center"><h3 class="text-xl font-semibold">Gerenciar Usuários</h3><button id="close-usuarios-modal" class="text-2xl">&times;</button></div>
+         <div class="p-6">
+             <form id="usuario-form" class="mb-6">
+                 <h4 class="font-semibold mb-2">Convidar Novo Usuário</h4>
+                 <div class="flex items-start gap-4">
+                     <div class="flex-grow relative">
+                         <label class="block text-sm font-medium mb-1">Pesquisar Colaborador</label>
+                         <input type="text" id="colaborador-search" class="form-input" placeholder="Digite o nome do colaborador..." autocomplete="off">
+                         <div id="colaborador-search-results" class="absolute z-10 w-full bg-white border rounded-md mt-1 shadow-lg hidden max-h-48 overflow-y-auto"></div>
+                         <div id="colaborador-selecionado-container" class="mt-2 hidden"></div>
+                         <input type="hidden" id="usuario-email">
+                     </div>
+                     <div>
+                        <label class="block text-sm font-medium mb-1">Permissões de Acesso</label>
+                        <div id="permissoes-checkboxes" class="grid grid-cols-2 gap-x-4 gap-y-2 mt-1"></div>
+                     </div>
+                     <button type="submit" class="self-end px-4 py-2 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600">Convidar</button>
+                 </div>
+             </form>
+             <h4 class="font-semibold mb-2 mt-8 border-t pt-4">Usuários Ativos</h4>
+             <div id="usuarios-list" class="space-y-2 max-h-80 overflow-y-auto"></div>
+         </div>
     </div>
+    
+    <!-- Outros modals (cursos, documentos, etc) serão adicionados aqui -->
 
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, deleteDoc, query, orderBy, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         // ====================================================================================
-        // COLE AQUI A CONFIGURAÇÃO DO SEU FIREBASE
         const firebaseConfig = {
-            apiKey: "AIzaSyDJEFwpP0GuuBugz4KFgzwdJTlhXS3H7w8",
-            authDomain: "confyn-47447.firebaseapp.com",
-            projectId: "confyn-47447",
-            storageBucket: "confyn-47447.firebasestorage.app",
-            messagingSenderId: "292650745185",
-            appId: "1:292650745185:web:2e1555246eb1b14c115920"
+            apiKey: "SUA_API_KEY",
+            authDomain: "SEU_AUTH_DOMAIN",
+            projectId: "SEU_PROJECT_ID",
+            storageBucket: "SEU_STORAGE_BUCKET",
+            messagingSenderId: "SEU_MESSAGING_SENDER_ID",
+            appId: "SEU_APP_ID"
         };
         // ====================================================================================
 
@@ -198,127 +206,174 @@
         // --- AUTH & SECURITY ---
         onAuthStateChanged(auth, user => {
             if (user) {
-                // Usuário está logado, atualiza a UI
-                console.log("Usuário logado:", user.email);
                 const userName = user.email.split('@')[0];
                 document.getElementById('user-name').textContent = userName;
                 document.getElementById('user-initials').textContent = userName.substring(0, 2).toUpperCase();
             } else {
-                // Usuário não está logado, redireciona para a página de login
-                console.log("Nenhum usuário logado. Redirecionando...");
                 window.location.href = 'index.html';
             }
         });
+        document.getElementById('logout-button').addEventListener('click', () => signOut(auth));
 
-        document.getElementById('logout-button').addEventListener('click', () => {
-            signOut(auth).catch(error => console.error("Erro no logout:", error));
-        });
-
-        // --- MODAL CURSOS ---
-        const cursosModal = document.getElementById('cursos-modal');
-        const cursosModalBackdrop = document.getElementById('cursos-modal-backdrop');
-        const cursoForm = document.getElementById('curso-form');
-        const cursoNomeInput = document.getElementById('curso-nome');
-        const cursoIdInput = document.getElementById('curso-id');
-        const cancelEditButton = document.getElementById('cancel-edit-curso');
+        // --- GLOBAL STATE ---
+        const menuItems = ['dashboard', 'empresas', 'turmas', 'financeiro', 'colaboradores', 'estoque', 'administrativo'];
+        let allColaboradores = [];
+        let existingUsersEmails = [];
         
-        const openCursosModal = () => {
-            fetchCursos();
-            cursosModal.style.display = 'block';
-            cursosModalBackdrop.style.display = 'block';
+        // --- MODAL USUÁRIOS ---
+        const usuariosModal = document.getElementById('usuarios-modal');
+        const usuariosModalBackdrop = document.getElementById('usuarios-modal-backdrop');
+        const usuarioForm = document.getElementById('usuario-form');
+        const colaboradorSearchInput = document.getElementById('colaborador-search');
+        const searchResultsContainer = document.getElementById('colaborador-search-results');
+        const selectedContainer = document.getElementById('colaborador-selecionado-container');
+        const emailInputHidden = document.getElementById('usuario-email');
+
+        const openUsuariosModal = async () => {
+            populatePermissionsCheckboxes();
+            await fetchUsuarios(); // Pega emails de usuários existentes primeiro
+            await fetchColaboradores(); // Pega todos os colaboradores
+            usuariosModal.style.display = 'block';
+            usuariosModalBackdrop.style.display = 'block';
+        };
+        const closeUsuariosModal = () => {
+            usuariosModal.style.display = 'none';
+            usuariosModalBackdrop.style.display = 'none';
         };
 
-        const closeCursosModal = () => {
-            cursoForm.reset();
-            cursoIdInput.value = '';
-            cancelEditButton.classList.add('hidden');
-            cursosModal.style.display = 'none';
-            cursosModalBackdrop.style.display = 'none';
-        };
-
-        document.getElementById('gerenciar-cursos-card').addEventListener('click', openCursosModal);
-        document.getElementById('close-cursos-modal').addEventListener('click', closeCursosModal);
-        cursosModalBackdrop.addEventListener('click', closeCursosModal);
+        document.getElementById('gerenciar-usuarios-card').addEventListener('click', openUsuariosModal);
+        document.getElementById('close-usuarios-modal').addEventListener('click', closeUsuariosModal);
         
-        cancelEditButton.addEventListener('click', () => {
-            cursoForm.reset();
-            cursoIdInput.value = '';
-            cancelEditButton.classList.add('hidden');
-        });
-
-        // --- CRUD CURSOS ---
-        async function fetchCursos() {
-            const cursosListContainer = document.getElementById('cursos-list');
-            cursosListContainer.innerHTML = '<p>Carregando cursos...</p>';
+        async function fetchColaboradores() {
+             try {
+                const snapshot = await getDocs(query(collection(db, "colaboradores"), orderBy("nome")));
+                allColaboradores = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            } catch (error) { console.error("Erro ao buscar colaboradores:", error); }
+        }
+        
+        colaboradorSearchInput.addEventListener('input', () => {
+            const searchTerm = colaboradorSearchInput.value.toLowerCase();
+            searchResultsContainer.innerHTML = '';
+            if (searchTerm.length < 2) {
+                searchResultsContainer.classList.add('hidden');
+                return;
+            }
             
-            try {
-                const q = query(collection(db, "cursos"), orderBy("nome"));
-                const querySnapshot = await getDocs(q);
-                
-                if (querySnapshot.empty) {
-                    cursosListContainer.innerHTML = '<p class="text-gray-500">Nenhum curso cadastrado.</p>';
-                    return;
-                }
+            const filtered = allColaboradores.filter(c => 
+                c.nome.toLowerCase().includes(searchTerm) && 
+                !existingUsersEmails.includes(c.email) // Mostra apenas quem AINDA NÃO é usuário
+            );
 
-                cursosListContainer.innerHTML = '';
-                querySnapshot.forEach((doc) => {
-                    const curso = { id: doc.id, ...doc.data() };
-                    const cursoDiv = document.createElement('div');
-                    cursoDiv.className = 'flex justify-between items-center p-3 bg-gray-50 rounded-lg border';
-                    cursoDiv.innerHTML = `
-                        <span class="text-gray-800">${curso.nome}</span>
-                        <div class="flex gap-3">
-                            <button onclick="window.editCurso('${curso.id}', '${curso.nome}')" class="text-blue-600 hover:text-blue-800"><ion-icon name="create-outline"></ion-icon></button>
-                            <button onclick="window.deleteCurso('${curso.id}')" class="text-red-600 hover:text-red-800"><ion-icon name="trash-outline"></ion-icon></button>
+            if (filtered.length > 0) {
+                filtered.forEach(c => {
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'p-2 hover:bg-gray-100 cursor-pointer';
+                    resultItem.textContent = `${c.nome} (${c.email})`;
+                    resultItem.onclick = () => selectColaborador(c);
+                    searchResultsContainer.appendChild(resultItem);
+                });
+                searchResultsContainer.classList.remove('hidden');
+            } else {
+                searchResultsContainer.classList.add('hidden');
+            }
+        });
+
+        function selectColaborador(colaborador) {
+            colaboradorSearchInput.value = '';
+            searchResultsContainer.classList.add('hidden');
+            emailInputHidden.value = colaborador.email;
+            
+            selectedContainer.innerHTML = `
+                <span class="inline-flex items-center gap-x-2 bg-blue-100 text-blue-800 text-sm font-medium px-2.5 py-1 rounded-full">
+                    ${colaborador.nome}
+                    <button type="button" id="clear-selection" class="text-blue-600 hover:text-blue-800">&times;</button>
+                </span>
+            `;
+            selectedContainer.classList.remove('hidden');
+            document.getElementById('clear-selection').onclick = () => {
+                emailInputHidden.value = '';
+                selectedContainer.classList.add('hidden');
+            };
+        }
+        
+        function populatePermissionsCheckboxes() {
+            const container = document.getElementById('permissoes-checkboxes');
+            container.innerHTML = '';
+            menuItems.forEach(item => {
+                container.innerHTML += `
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" name="permissao" value="${item}" class="rounded text-orange-500 focus:ring-orange-500">
+                        <span class="text-sm capitalize">${item.replace(/_/g, ' ')}</span>
+                    </label>
+                `;
+            });
+        }
+        
+        async function fetchUsuarios() {
+            const listContainer = document.getElementById('usuarios-list');
+            listContainer.innerHTML = '<p>Carregando...</p>';
+            try {
+                const snapshot = await getDocs(collection(db, "usuarios"));
+                listContainer.innerHTML = '';
+                existingUsersEmails = [];
+                snapshot.forEach(doc => {
+                    const user = { id: doc.id, ...doc.data() };
+                    existingUsersEmails.push(user.email);
+                    const userPermissions = menuItems.filter(menu => user.permissoes[menu]).join(', ');
+                    listContainer.innerHTML += `
+                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border">
+                            <div>
+                                <p class="font-semibold">${user.email}</p>
+                                <p class="text-xs text-gray-500">Acessos: ${userPermissions}</p>
+                            </div>
+                            <button onclick="window.deleteUsuario('${user.id}')" class="text-red-600 hover:text-red-800"><ion-icon name="trash-outline"></ion-icon></button>
                         </div>
                     `;
-                    cursosListContainer.appendChild(cursoDiv);
                 });
             } catch (error) {
-                console.error("Erro ao buscar cursos: ", error);
-                cursosListContainer.innerHTML = '<p class="text-red-500">Erro ao carregar cursos.</p>';
+                console.error("Erro ao buscar usuários:", error);
+                listContainer.innerHTML = '<p class="text-red-500">Erro ao carregar.</p>';
             }
         }
 
-        cursoForm.addEventListener('submit', async (e) => {
+        usuarioForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const cursoNome = cursoNomeInput.value.trim();
-            const cursoId = cursoIdInput.value;
+            const email = emailInputHidden.value;
+            if (!email) {
+                alert('Por favor, pesquise e selecione um colaborador.');
+                return;
+            }
 
-            if (!cursoNome) return;
-
+            const permissoes = {};
+            document.querySelectorAll('input[name="permissao"]:checked').forEach(checkbox => {
+                permissoes[checkbox.value] = true;
+            });
+            
             try {
-                if (cursoId) { // Editando
-                    await updateDoc(doc(db, "cursos", cursoId), { nome: cursoNome });
-                } else { // Adicionando
-                    await addDoc(collection(db, "cursos"), { nome: cursoNome });
-                }
-                cursoForm.reset();
-                cursoIdInput.value = '';
-                cancelEditButton.classList.add('hidden');
-                fetchCursos();
+                await setDoc(doc(db, "usuarios", email), { email, permissoes });
+                await sendPasswordResetEmail(auth, email);
+                
+                alert(`Convite enviado para ${email}! O usuário receberá um link para criar sua senha.`);
+                usuarioForm.reset();
+                selectedContainer.classList.add('hidden');
+                emailInputHidden.value = '';
+                fetchUsuarios();
             } catch (error) {
-                console.error("Erro ao salvar curso: ", error);
+                console.error("Erro ao convidar usuário:", error);
+                alert("Erro ao convidar usuário. Verifique o e-mail e tente novamente.");
             }
         });
-        
-        window.editCurso = (id, nome) => {
-            cursoIdInput.value = id;
-            cursoNomeInput.value = nome;
-            cursoNomeInput.focus();
-            cancelEditButton.classList.remove('hidden');
-        };
 
-        window.deleteCurso = async (id) => {
-            if (confirm('Tem certeza que deseja excluir este curso? Esta ação não pode ser desfeita.')) {
+        window.deleteUsuario = async (email) => {
+            if(confirm(`Tem certeza que deseja remover as permissões do usuário ${email}?`)){
                 try {
-                    await deleteDoc(doc(db, "cursos", id));
-                    fetchCursos();
-                } catch (error) {
-                    console.error("Erro ao excluir curso: ", error);
-                }
+                    await deleteDoc(doc(db, "usuarios", email));
+                    fetchUsuarios();
+                } catch(error) { console.error("Erro ao remover usuário:", error); }
             }
-        };
+        }
+        
+        // --- CÓDIGO PARA OS OUTROS MODAIS (CURSOS, DOCUMENTOS, ETC.) SERIA ADICIONADO AQUI ---
 
     </script>
 </body>
