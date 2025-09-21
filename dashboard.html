@@ -19,6 +19,7 @@
     
     <!-- Chart.js CDN for graphs -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     
     <style>
         body { 
@@ -84,14 +85,6 @@
                     <span class="ml-4">Administrativo</span>
                 </a>
             </nav>
-
-            <!-- Rodapé da Sidebar -->
-            <div class="p-4 border-t border-slate-800">
-                <a href="#" class="flex items-center text-sm">
-                    <ion-icon name="chevron-back-outline" class="text-xl"></ion-icon>
-                    <span class="ml-2">Recolher Menu</span>
-                </a>
-            </div>
         </aside>
 
         <!-- Conteúdo Principal -->
@@ -103,16 +96,12 @@
                     <p class="text-sm text-gray-500">Visão Geral do Sistema</p>
                 </div>
                 <div class="flex items-center gap-6">
-                    <div class="relative">
-                        <ion-icon name="search-outline" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></ion-icon>
-                        <input type="text" placeholder="Busca rápida..." class="pl-10 pr-4 py-2 w-64 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
-                    </div>
                     <ion-icon name="notifications-outline" class="text-2xl text-gray-600 cursor-pointer"></ion-icon>
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-slate-300 flex items-center justify-center font-bold text-slate-600">UN</div>
+                        <div class="w-10 h-10 rounded-full bg-slate-300 flex items-center justify-center font-bold text-slate-600" id="user-initials">UN</div>
                         <div>
-                            <p class="font-semibold text-sm">Usuário Admin</p>
-                            <a href="index.html" class="text-xs text-orange-600 hover:underline">Sair</a>
+                            <p class="font-semibold text-sm" id="user-name">Usuário Admin</p>
+                            <a href="#" id="logout-button" class="text-xs text-orange-600 hover:underline">Sair</a>
                         </div>
                     </div>
                 </div>
@@ -123,39 +112,31 @@
                 <!-- KPIs -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <div class="bg-white p-6 rounded-lg shadow-sm flex items-center gap-4">
-                        <div class="bg-blue-100 p-3 rounded-full">
-                            <ion-icon name="calendar-outline" class="text-2xl text-blue-500"></ion-icon>
-                        </div>
+                        <div class="bg-blue-100 p-3 rounded-full"><ion-icon name="calendar-outline" class="text-2xl text-blue-500"></ion-icon></div>
                         <div>
                             <p class="text-sm text-gray-500">Próximas Turmas (Mês)</p>
-                            <p class="text-2xl font-bold text-gray-800">8</p>
+                            <p class="text-2xl font-bold text-gray-800" id="kpi-turmas">0</p>
                         </div>
                     </div>
                     <div class="bg-white p-6 rounded-lg shadow-sm flex items-center gap-4">
-                        <div class="bg-green-100 p-3 rounded-full">
-                            <ion-icon name="cash-outline" class="text-2xl text-green-500"></ion-icon>
-                        </div>
+                        <div class="bg-green-100 p-3 rounded-full"><ion-icon name="cash-outline" class="text-2xl text-green-500"></ion-icon></div>
                         <div>
                             <p class="text-sm text-gray-500">Contas a Receber</p>
-                            <p class="text-2xl font-bold text-gray-800">R$ 12.540</p>
+                            <p class="text-2xl font-bold text-gray-800" id="kpi-receber">R$ 0,00</p>
                         </div>
                     </div>
                     <div class="bg-white p-6 rounded-lg shadow-sm flex items-center gap-4">
-                        <div class="bg-yellow-100 p-3 rounded-full">
-                            <ion-icon name="people-outline" class="text-2xl text-yellow-500"></ion-icon>
-                        </div>
+                        <div class="bg-yellow-100 p-3 rounded-full"><ion-icon name="people-outline" class="text-2xl text-yellow-500"></ion-icon></div>
                         <div>
                             <p class="text-sm text-gray-500">Novos Alunos (Mês)</p>
-                            <p class="text-2xl font-bold text-gray-800">45</p>
+                            <p class="text-2xl font-bold text-gray-800" id="kpi-alunos">0</p>
                         </div>
                     </div>
                     <div class="bg-white p-6 rounded-lg shadow-sm flex items-center gap-4">
-                        <div class="bg-red-100 p-3 rounded-full">
-                            <ion-icon name="alert-circle-outline" class="text-2xl text-red-500"></ion-icon>
-                        </div>
+                        <div class="bg-red-100 p-3 rounded-full"><ion-icon name="alert-circle-outline" class="text-2xl text-red-500"></ion-icon></div>
                         <div>
                             <p class="text-sm text-gray-500">Certificados a Vencer</p>
-                            <p class="text-2xl font-bold text-gray-800">12</p>
+                            <p class="text-2xl font-bold text-gray-800" id="kpi-vencer">0</p>
                         </div>
                     </div>
                 </div>
@@ -172,7 +153,7 @@
                     </div>
                 </div>
 
-                <!-- Tabelas de Acesso Rápido -->
+                <!-- Tabela de Acesso Rápido -->
                 <div class="bg-white p-6 rounded-lg shadow-sm">
                     <h3 class="font-semibold text-gray-700 mb-4">Agenda da Semana</h3>
                     <table class="w-full text-sm text-left text-gray-600">
@@ -185,93 +166,228 @@
                                 <th class="p-3">Status</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="p-3 font-medium text-gray-900">20/09/2025</td>
-                                <td class="p-3">Brigada de Incêndio - Nível I</td>
-                                <td class="p-3">Acme Corporation</td>
-                                <td class="p-3">Carlos Silva</td>
-                                <td class="p-3"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Confirmado</span></td>
-                            </tr>
-                             <tr class="border-b hover:bg-gray-50">
-                                <td class="p-3 font-medium text-gray-900">22/09/2025</td>
-                                <td class="p-3">NR-35 - Trabalho em Altura</td>
-                                <td class="p-3">Soluções XYZ Ltda</td>
-                                <td class="p-3">Ana Pereira</td>
-                                <td class="p-3"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Confirmado</span></td>
-                            </tr>
-                             <tr class="hover:bg-gray-50">
-                                <td class="p-3 font-medium text-gray-900">23/09/2025</td>
-                                <td class="p-3">Primeiros Socorros</td>
-                                <td class="p-3">Mercado Central</td>
-                                <td class="p-3">Carlos Silva</td>
-                                <td class="p-3"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">Pendente</span></td>
-                            </tr>
+                        <tbody id="agenda-table-body">
+                           <tr><td colspan="5" class="text-center p-8">Nenhuma turma agendada para os próximos 7 dias.</td></tr>
                         </tbody>
                     </table>
                 </div>
             </main>
         </div>
     </div>
-<script>
-    // Gráfico de Faturamento
-    const faturamentoCtx = document.getElementById('faturamentoChart').getContext('2d');
-    new Chart(faturamentoCtx, {
-        type: 'bar',
-        data: {
-            labels: ['Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set'],
-            datasets: [{
-                label: 'Faturamento',
-                data: [12500, 19200, 14300, 17800, 22500, 18900],
-                backgroundColor: 'rgba(249, 115, 22, 0.7)',
-                borderColor: 'rgba(249, 115, 22, 1)',
-                borderWidth: 1,
-                borderRadius: 5
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
+    
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, getDocs, query, where, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // Gráfico de Treinamentos
-    const treinamentosCtx = document.getElementById('treinamentosChart').getContext('2d');
-    new Chart(treinamentosCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Brigada de Incêndio', 'NR-35', 'Primeiros Socorros', 'Outros'],
-            datasets: [{
-                label: 'Tipos de Treinamento',
-                data: [45, 25, 20, 10],
-                backgroundColor: [
-                    'rgba(239, 68, 68, 0.8)',
-                    'rgba(59, 130, 246, 0.8)',
-                    'rgba(245, 158, 11, 0.8)',
-                    'rgba(107, 114, 128, 0.8)'
-                ],
-                borderColor: '#fff',
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top',
-                }
+        // ====================================================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDJEFwpP0GuuBugz4KFgzwdJTlhXS3H7w8",
+            authDomain: "confyn-47447.firebaseapp.com",
+            projectId: "confyn-47447",
+            storageBucket: "confyn-47447.firebasestorage.app",
+            messagingSenderId: "292650745185",
+            appId: "1:292650745185:web:2e1555246eb1b14c115920"
+        };
+        // ====================================================================================
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- AUTH & SECURITY ---
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                const userName = user.email.split('@')[0];
+                document.getElementById('user-name').textContent = userName;
+                document.getElementById('user-initials').textContent = userName.substring(0, 2).toUpperCase();
+                loadDashboardData();
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+        document.getElementById('logout-button').addEventListener('click', () => signOut(auth));
+
+        // --- DATA LOADING ---
+        async function loadDashboardData() {
+            try {
+                const [turmas, lancamentos, cursos] = await Promise.all([
+                    fetchCollection('turmas'),
+                    fetchCollection('lancamentos'),
+                    fetchCollection('cursos')
+                ]);
+
+                updateKPIs(turmas, lancamentos, cursos);
+                renderFaturamentoChart(lancamentos);
+                renderTreinamentosChart(turmas);
+                renderAgenda(turmas);
+
+            } catch (error) {
+                console.error("Erro ao carregar dados do dashboard:", error);
             }
         }
-    });
-</script>
+
+        async function fetchCollection(collectionName) {
+            const snapshot = await getDocs(collection(db, collectionName));
+            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        }
+
+        // --- KPIs ---
+        function updateKPIs(turmas, lancamentos, cursos) {
+            const hoje = new Date();
+            const primeiroDiaMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+            const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+
+            // 1. Próximas Turmas no Mês
+            const turmasNoMes = turmas.filter(t => {
+                if (!t.data) return false;
+                const dataTurma = t.data.toDate();
+                return dataTurma >= primeiroDiaMes && dataTurma <= ultimoDiaMes;
+            });
+            document.getElementById('kpi-turmas').textContent = turmasNoMes.length;
+
+            // 2. Contas a Receber (Total)
+            const aReceber = lancamentos
+                .filter(l => l.tipo === 'Receita' && l.status !== 'Paga')
+                .reduce((sum, l) => sum + l.valor, 0);
+            document.getElementById('kpi-receber').textContent = aReceber.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+            // 3. Novos Alunos no Mês
+            const novosAlunos = turmasNoMes.reduce((sum, t) => sum + (t.alunos ? t.alunos.length : 0), 0);
+            document.getElementById('kpi-alunos').textContent = novosAlunos;
+
+            // 4. Certificados a Vencer (Lógica atualizada)
+            const cursosMap = new Map(cursos.map(c => [c.nome, c.validadeMeses]));
+            const dataAlerta = new Date();
+            dataAlerta.setDate(dataAlerta.getDate() + 30); // Alerta para os que vencem nos próximos 30 dias
+            
+            const aVencer = turmas.filter(t => {
+                if(t.status !== 'Concluída' || !t.data) return false;
+                
+                const validadeMeses = cursosMap.get(t.cursoNome);
+                if (validadeMeses === undefined || validadeMeses <= 0) return false; // Não vence ou não tem validade
+                
+                const dataTurma = t.data.toDate();
+                const dataVencimento = new Date(dataTurma);
+                dataVencimento.setMonth(dataVencimento.getMonth() + validadeMeses);
+
+                return dataVencimento > hoje && dataVencimento <= dataAlerta;
+            });
+             document.getElementById('kpi-vencer').textContent = aVencer.length;
+        }
+        
+        // --- CHARTS ---
+        let faturamentoChartInstance = null;
+        function renderFaturamentoChart(lancamentos) {
+            const labels = [];
+            const data = [];
+            const hoje = new Date();
+            
+            for (let i = 5; i >= 0; i--) {
+                const date = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+                labels.push(date.toLocaleString('pt-BR', { month: 'short' }));
+                
+                const inicioMes = new Date(date.getFullYear(), date.getMonth(), 1);
+                const fimMes = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+                const faturamentoMes = lancamentos
+                    .filter(l => {
+                        if (l.tipo !== 'Receita' || l.status !== 'Paga' || !l.vencimento) return false;
+                        const dataVencimento = l.vencimento.toDate();
+                        return dataVencimento >= inicioMes && dataVencimento <= fimMes;
+                    })
+                    .reduce((sum, l) => sum + l.valor, 0);
+                
+                data.push(faturamentoMes);
+            }
+            
+            if (faturamentoChartInstance) faturamentoChartInstance.destroy();
+            const ctx = document.getElementById('faturamentoChart').getContext('2d');
+            faturamentoChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Faturamento',
+                        data: data,
+                        backgroundColor: 'rgba(249, 115, 22, 0.7)',
+                        borderColor: 'rgba(249, 115, 22, 1)',
+                        borderWidth: 1,
+                        borderRadius: 5
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { display: false }}, scales: { y: { beginAtZero: true }}}
+            });
+        }
+        
+        let treinamentosChartInstance = null;
+        function renderTreinamentosChart(turmas) {
+            const turmasConcluidas = turmas.filter(t => t.status === 'Concluída');
+            const counts = turmasConcluidas.reduce((acc, t) => {
+                acc[t.cursoNome] = (acc[t.cursoNome] || 0) + 1;
+                return acc;
+            }, {});
+
+            const sortedCursos = Object.entries(counts).sort(([,a],[,b]) => b-a);
+            
+            const labels = sortedCursos.map(item => item[0]);
+            const data = sortedCursos.map(item => item[1]);
+            
+            if (treinamentosChartInstance) treinamentosChartInstance.destroy();
+            const ctx = document.getElementById('treinamentosChart').getContext('2d');
+            treinamentosChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: ['rgba(239, 68, 68, 0.8)', 'rgba(59, 130, 246, 0.8)', 'rgba(245, 158, 11, 0.8)', 'rgba(107, 114, 128, 0.8)'],
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { position: 'top' }}}
+            });
+        }
+
+        // --- AGENDA ---
+        function renderAgenda(turmas) {
+            const tableBody = document.getElementById('agenda-table-body');
+            tableBody.innerHTML = '';
+            
+            const hoje = new Date();
+            hoje.setHours(0,0,0,0);
+            const seteDiasDepois = new Date();
+            seteDiasDepois.setDate(hoje.getDate() + 7);
+            
+            const turmasDaSemana = turmas
+                .filter(t => {
+                    if (!t.data) return false;
+                    const dataTurma = t.data.toDate();
+                    return dataTurma >= hoje && dataTurma <= seteDiasDepois;
+                })
+                .sort((a,b) => a.data.toDate() - b.data.toDate());
+
+            if (turmasDaSemana.length === 0) {
+                 tableBody.innerHTML = `<tr><td colspan="5" class="text-center p-8">Nenhuma turma agendada para os próximos 7 dias.</td></tr>`;
+                 return;
+            }
+
+            turmasDaSemana.forEach(turma => {
+                const statusClass = turma.status === 'Agendada' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
+                tableBody.innerHTML += `
+                     <tr class="border-b hover:bg-gray-50">
+                        <td class="p-3 font-medium text-gray-900">${turma.data.toDate().toLocaleDateString('pt-BR')}</td>
+                        <td class="p-3">${turma.cursoNome}</td>
+                        <td class="p-3">${turma.empresaNome}</td>
+                        <td class="p-3 text-gray-400">A definir</td>
+                        <td class="p-3"><span class="px-2 py-1 text-xs font-semibold rounded-full ${statusClass}">${turma.status}</span></td>
+                    </tr>
+                `;
+            });
+        }
+    </script>
 </body>
 </html>
+
