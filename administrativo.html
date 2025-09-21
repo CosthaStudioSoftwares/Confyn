@@ -142,8 +142,8 @@
     <!-- Modal para Gerenciar Usuários -->
     <div id="usuarios-modal-backdrop" class="modal-backdrop"></div>
     <div id="usuarios-modal" class="modal bg-white rounded-lg shadow-xl w-full max-w-3xl">
-        <div class="p-6 border-b flex justify-between items-center"><h3 class="text-xl font-semibold">Gerenciar Usuários</h3><button id="close-usuarios-modal" class="text-2xl">&times;</button></div>
-        <div class="p-6 max-h-[80vh] overflow-y-auto">
+         <div class="p-6 border-b flex justify-between items-center"><h3 class="text-xl font-semibold">Gerenciar Usuários</h3><button id="close-usuarios-modal" class="text-2xl">&times;</button></div>
+         <div class="p-6 max-h-[80vh] overflow-y-auto">
              <form id="usuario-form" class="mb-6">
                  <h4 class="font-semibold mb-2">Convidar Novo Usuário</h4>
                  <div class="flex items-start gap-4">
@@ -219,14 +219,170 @@
         });
         document.getElementById('logout-button').addEventListener('click', () => signOut(auth));
 
-        // --- GLOBAL STATE & INITIAL SETUP ---
+        // --- GLOBAL STATE ---
         const menuItems = ['dashboard', 'empresas', 'turmas', 'financeiro', 'colaboradores', 'estoque', 'administrativo'];
         let allColaboradores = [];
         let existingUsersEmails = [];
-
+        
         // --- MODAL USUÁRIOS ---
-        // ... (código do modal de usuários permanece o mesmo) ...
+        const usuariosModal = document.getElementById('usuarios-modal');
+        const usuariosModalBackdrop = document.getElementById('usuarios-modal-backdrop');
+        const usuarioForm = document.getElementById('usuario-form');
+        const colaboradorSearchInput = document.getElementById('colaborador-search');
+        const searchResultsContainer = document.getElementById('colaborador-search-results');
+        const selectedContainer = document.getElementById('colaborador-selecionado-container');
+        const emailInputHidden = document.getElementById('usuario-email');
 
+        const openUsuariosModal = async () => {
+            populatePermissionsCheckboxes();
+            await fetchUsuarios(); 
+            await fetchColaboradores();
+            usuariosModal.style.display = 'block';
+            usuariosModalBackdrop.style.display = 'block';
+        };
+        const closeUsuariosModal = () => {
+            usuariosModal.style.display = 'none';
+            usuariosModalBackdrop.style.display = 'none';
+        };
+
+        document.getElementById('gerenciar-usuarios-card').addEventListener('click', openUsuariosModal);
+        document.getElementById('close-usuarios-modal').addEventListener('click', closeUsuariosModal);
+        
+        async function fetchColaboradores() {
+             try {
+                const snapshot = await getDocs(query(collection(db, "colaboradores"), orderBy("nome")));
+                allColaboradores = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            } catch (error) { console.error("Erro ao buscar colaboradores:", error); }
+        }
+        
+        colaboradorSearchInput.addEventListener('input', () => {
+            const searchTerm = colaboradorSearchInput.value.toLowerCase();
+            searchResultsContainer.innerHTML = '';
+            if (searchTerm.length < 2) {
+                searchResultsContainer.classList.add('hidden');
+                return;
+            }
+            
+            const filtered = allColaboradores.filter(c => 
+                c.nome.toLowerCase().includes(searchTerm) && 
+                !existingUsersEmails.includes(c.email)
+            );
+
+            if (filtered.length > 0) {
+                filtered.forEach(c => {
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'p-2 hover:bg-gray-100 cursor-pointer';
+                    resultItem.textContent = `${c.nome} (${c.email})`;
+                    resultItem.onclick = () => selectColaborador(c);
+                    searchResultsContainer.appendChild(resultItem);
+                });
+                searchResultsContainer.classList.remove('hidden');
+            } else {
+                searchResultsContainer.innerHTML = `<div class="p-2 text-gray-500">Nenhum colaborador encontrado.</div>`;
+                searchResultsContainer.classList.remove('hidden');
+            }
+        });
+
+        function selectColaborador(colaborador) {
+            colaboradorSearchInput.value = '';
+            searchResultsContainer.classList.add('hidden');
+            emailInputHidden.value = colaborador.email;
+            
+            selectedContainer.innerHTML = `
+                <span class="inline-flex items-center gap-x-2 bg-blue-100 text-blue-800 text-sm font-medium px-2.5 py-1 rounded-full">
+                    ${colaborador.nome}
+                    <button type="button" id="clear-selection" class="text-blue-600 hover:text-blue-800">&times;</button>
+                </span>
+            `;
+            selectedContainer.classList.remove('hidden');
+            document.getElementById('clear-selection').onclick = () => {
+                emailInputHidden.value = '';
+                selectedContainer.classList.add('hidden');
+                colaboradorSearchInput.value = '';
+            };
+        }
+        
+        function populatePermissionsCheckboxes() {
+            const container = document.getElementById('permissoes-checkboxes');
+            container.innerHTML = '';
+            menuItems.forEach(item => {
+                container.innerHTML += `
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" name="permissao" value="${item}" class="rounded text-orange-500 focus:ring-orange-500">
+                        <span class="text-sm capitalize">${item.replace(/_/g, ' ')}</span>
+                    </label>
+                `;
+            });
+        }
+        
+        async function fetchUsuarios() {
+            const listContainer = document.getElementById('usuarios-list');
+            listContainer.innerHTML = '<p>Carregando...</p>';
+            try {
+                const snapshot = await getDocs(collection(db, "usuarios"));
+                listContainer.innerHTML = '';
+                existingUsersEmails = [];
+                if(snapshot.empty) {
+                    listContainer.innerHTML = '<p class="text-gray-500">Nenhum usuário com permissão cadastrado.</p>';
+                }
+                snapshot.forEach(doc => {
+                    const user = { id: doc.id, ...doc.data() };
+                    existingUsersEmails.push(user.email);
+                    const userPermissions = menuItems.filter(menu => user.permissoes[menu]).join(', ') || 'Nenhuma';
+                    listContainer.innerHTML += `
+                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border">
+                            <div>
+                                <p class="font-semibold">${user.email}</p>
+                                <p class="text-xs text-gray-500">Acessos: ${userPermissions}</p>
+                            </div>
+                            <button onclick="window.deleteUsuario('${user.id}')" class="text-red-600 hover:text-red-800"><ion-icon name="trash-outline"></ion-icon></button>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                console.error("Erro ao buscar usuários:", error);
+                listContainer.innerHTML = '<p class="text-red-500">Erro ao carregar.</p>';
+            }
+        }
+
+        usuarioForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = emailInputHidden.value;
+            if (!email) {
+                alert('Por favor, pesquise e selecione um colaborador.');
+                return;
+            }
+
+            const permissoes = {};
+            document.querySelectorAll('input[name="permissao"]').forEach(checkbox => {
+                permissoes[checkbox.value] = checkbox.checked;
+            });
+            
+            try {
+                await setDoc(doc(db, "usuarios", email), { email, permissoes });
+                await sendPasswordResetEmail(auth, email);
+                
+                alert(`Convite enviado para ${email}! O usuário receberá um link para criar sua senha.`);
+                usuarioForm.reset();
+                selectedContainer.classList.add('hidden');
+                emailInputHidden.value = '';
+                document.querySelectorAll('input[name="permissao"]').forEach(c => c.checked = false);
+                fetchUsuarios();
+            } catch (error) {
+                console.error("Erro ao convidar usuário:", error);
+                alert("Erro ao convidar usuário. Verifique o e-mail e tente novamente.");
+            }
+        });
+
+        window.deleteUsuario = async (email) => {
+            if(confirm(`Tem certeza que deseja remover as permissões do usuário ${email}?`)){
+                try {
+                    await deleteDoc(doc(db, "usuarios", email));
+                    fetchUsuarios();
+                } catch(error) { console.error("Erro ao remover usuário:", error); }
+            }
+        }
+        
         // --- MODAL CURSOS ---
         const cursosModal = document.getElementById('cursos-modal');
         const cursosModalBackdrop = document.getElementById('cursos-modal-backdrop');
@@ -330,14 +486,16 @@
             const defaultCursos = [
                 { nome: 'NR-05 - CIPA', validadeMeses: 12 },
                 { nome: 'NR-06 - Equipamento de Proteção Individual (EPI)', validadeMeses: 24 },
-                { nome: 'NR-10 - Segurança em Eletricidade', validadeMeses: 24 },
-                { nome: 'NR-11 - Operador de Empilhadeira', validadeMeses: 12 },
-                { nome: 'NR-12 - Segurança em Máquinas e Equipamentos', validadeMeses: 0 }, // Carga horária, não validade
+                { nome: 'NR-10 - Segurança em Eletricidade (Básico)', validadeMeses: 24 },
+                { nome: 'NR-11 - Op. de Empilhadeira/Transporte', validadeMeses: 12 },
+                { nome: 'NR-12 - Segurança em Máquinas e Equipamentos', validadeMeses: 0 },
+                { nome: 'NR-18 - Construção Civil (Admissional)', validadeMeses: 0 },
                 { nome: 'NR-20 - Segurança com Inflamáveis', validadeMeses: 24 },
                 { nome: 'NR-33 - Espaços Confinados', validadeMeses: 12 },
                 { nome: 'NR-35 - Trabalho em Altura', validadeMeses: 24 },
                 { nome: 'Brigada de Incêndio', validadeMeses: 12 },
                 { nome: 'Primeiros Socorros (básico)', validadeMeses: 24 },
+                { nome: 'APH - Atendimento Pré-Hospitalar', validadeMeses: 24 }
             ];
 
             const batch = writeBatch(db);
@@ -348,7 +506,6 @@
             await batch.commit();
         }
 
-        // --- (código do modal de usuários permanece o mesmo) ---
     </script>
 </body>
 </html>
