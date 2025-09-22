@@ -329,12 +329,12 @@
 
         // ====================================================================================
         const firebaseConfig = {
-            apiKey: "AIzaSyDJEFwpP0GuuBugz4KFgzwdJTlhXS3H7w8",
-            authDomain: "confyn-47447.firebaseapp.com",
-            projectId: "confyn-47447",
-            storageBucket: "confyn-47447.firebasestorage.app",
-            messagingSenderId: "292650745185",
-            appId: "1:292650745185:web:2e1555246eb1b14c115920"
+            apiKey: "SUA_API_KEY",
+            authDomain: "SEU_AUTH_DOMAIN",
+            projectId: "SEU_PROJECT_ID",
+            storageBucket: "SEU_STORAGE_BUCKET",
+            messagingSenderId: "SEU_MESSAGING_SENDER_ID",
+            appId: "SEU_APP_ID"
         };
         // ====================================================================================
 
@@ -372,7 +372,87 @@
             return docSnap.exists() ? docSnap.data() : {};
         }
 
-        // --- (código dos modais, formulários, etc. permanece o mesmo) ---
+        async function fetchTurmas() {
+            try {
+                const q = query(collection(db, "turmas"), orderBy("data", "desc"));
+                const querySnapshot = await getDocs(q);
+                allTurmas = querySnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    const jsDate = data.data ? data.data.toDate() : null;
+                    return { id: doc.id, ...data, data: jsDate };
+                });
+                applyFiltersAndSearch();
+            } catch (error) { console.error("Erro ao buscar turmas: ", error); }
+        }
+        
+        // --- MODAL TURMA ---
+        const turmaModal = document.getElementById('turma-modal');
+        const turmaModalBackdrop = document.getElementById('turma-modal-backdrop');
+
+        const openTurmaModal = (turma = null) => {
+            document.getElementById('turma-form').reset();
+            document.getElementById('turma-id').value = '';
+            tempAlunosList = [];
+
+            if (turma) {
+                document.getElementById('turma-modal-title').textContent = 'Editar Turma';
+                document.getElementById('turma-id').value = turma.id;
+                document.getElementById('curso-nome').value = turma.cursoNome;
+                document.getElementById('empresa-select').value = turma.empresaId;
+                document.getElementById('turma-data').valueAsDate = turma.data;
+                document.getElementById('turma-status').value = turma.status;
+                tempAlunosList = turma.alunos || [];
+            } else {
+                document.getElementById('turma-modal-title').textContent = 'Adicionar Nova Turma';
+            }
+            
+            updateAlunosListUI();
+            turmaModal.style.display = 'block';
+            turmaModalBackdrop.style.display = 'block';
+        };
+
+        const closeTurmaModal = () => {
+            turmaModal.style.display = 'none';
+            turmaModalBackdrop.style.display = 'none';
+        };
+
+        document.getElementById('add-turma-button').addEventListener('click', () => openTurmaModal());
+        document.getElementById('close-turma-modal-button').addEventListener('click', closeTurmaModal);
+        document.getElementById('cancel-turma-modal-button').addEventListener('click', closeTurmaModal);
+
+        // --- MODAL ALUNO ---
+        const alunoModal = document.getElementById('aluno-modal');
+        const alunoModalBackdrop = document.getElementById('aluno-modal-backdrop');
+
+        const openAlunoModal = (aluno = null) => {
+            document.getElementById('aluno-form').reset();
+            document.getElementById('aluno-id').value = '';
+            document.getElementById('upload-status').textContent = '';
+
+            if (aluno) {
+                document.getElementById('aluno-modal-title').textContent = 'Editar Aluno';
+                document.getElementById('aluno-id').value = aluno.tempId || aluno.id;
+                Object.keys(aluno).forEach(key => {
+                    const element = document.getElementById(`aluno-${key}`);
+                    if (element) element.value = aluno[key];
+                });
+            } else {
+                document.getElementById('aluno-modal-title').textContent = 'Adicionar Novo Aluno';
+            }
+
+            alunoModal.style.display = 'block';
+            alunoModalBackdrop.style.display = 'block';
+        };
+
+        const closeAlunoModal = () => {
+            alunoModal.style.display = 'none';
+            alunoModalBackdrop.style.display = 'none';
+        };
+
+        document.getElementById('add-aluno-button').addEventListener('click', () => openAlunoModal());
+        document.getElementById('cancel-aluno-modal-button').addEventListener('click', closeAlunoModal);
+        
+        // --- (código de filtros, paginação e formulários permanece o mesmo) ---
 
         // --- GERAR CERTIFICADOS ---
         window.gerarCertificados = async (turmaId) => {
@@ -389,12 +469,10 @@
 
             alert(`Gerando ${turma.alunos.length} certificado(s)... Isso pode levar um momento.`);
 
-            for (const aluno of turma.alunos) {
-                doc.addPage();
+            for (const [index, aluno] of turma.alunos.entries()) {
+                if (index > 0) doc.addPage();
                 
-                // Desenhar o layout do certificado
-                // (Este é um layout simples, pode ser aprimorado com imagens de fundo, etc.)
-                doc.rect(5, 5, 287, 200); // Borda
+                doc.rect(5, 5, 287, 200); 
 
                 if (systemConfig.logoUrl) {
                      try {
@@ -409,9 +487,7 @@
                             reader.readAsDataURL(blob);
                         });
                     } catch (e) {
-                         console.error("Erro ao carregar logo:", e);
-                         doc.setFontSize(14);
-                         doc.text(systemConfig.nomeEmpresa || 'CONFYN', 20, 25);
+                         doc.setFontSize(14).text(systemConfig.nomeEmpresa || 'CONFYN', 20, 25);
                     }
                 } else {
                     doc.setFontSize(14).text(systemConfig.nomeEmpresa || 'CONFYN', 20, 25);
@@ -426,13 +502,12 @@
                 const splitText = doc.splitTextToSize(texto, 250);
                 doc.text(splitText, 148.5, 90, { align: 'center' });
                 
-                doc.line(80, 150, 218.5); // Linha da assinatura
+                doc.line(80, 150, 218.5);
                 doc.setFontSize(12);
                 doc.text(systemConfig.responsavelTecnico || 'Responsável Técnico', 148.5, 160, { align: 'center' });
             }
             
-            doc.deletePage(1); // Remove a primeira página em branco criada por padrão
-            doc.save(`Certificados_${turma.cursoNome}_${turma.empresaNome}.pdf`);
+            doc.save(`Certificados_${turma.cursoNome.replace(/\s/g, '_')}.pdf`);
         };
 
         function displayTurmas() {
@@ -441,8 +516,7 @@
 
             if (filteredTurmas.length === 0) {
                 tableBody.innerHTML = `<tr><td colspan="6" class="text-center p-8">Nenhuma turma encontrada.</td></tr>`;
-                updatePaginationControls();
-                return;
+                updatePaginationControls(); return;
             }
 
             const paginatedItems = filteredTurmas.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -467,12 +541,13 @@
                              <ion-icon onclick="window.deleteTurma('${turma.id}')" name="trash-outline" class="text-lg cursor-pointer hover:text-red-600" title="Excluir"></ion-icon>
                              ${turma.status === 'Concluída' ? `<ion-icon onclick="window.gerarCertificados('${turma.id}')" name="document-text-outline" class="text-lg cursor-pointer hover:text-green-600" title="Emitir Certificados"></ion-icon>` : ''}
                         </td>
-                    </tr>
-                `;
+                    </tr>`;
                 tableBody.innerHTML += row;
             });
             updatePaginationControls();
         }
+        
+        // --- (Restante do JavaScript, como paginação, stats, PDF, etc., permanece o mesmo) ---
     </script>
 </body>
 </html>
