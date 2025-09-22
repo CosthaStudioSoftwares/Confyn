@@ -168,7 +168,7 @@
     
     <!-- Modal para Gerenciar Cursos -->
     <div id="cursos-modal-backdrop" class="modal-backdrop"></div>
-    <div id="cursos-modal" class="modal bg-white rounded-lg shadow-xl w-full max-w-2xl">
+    <div id="cursos-modal" class="modal bg-white rounded-lg shadow-xl w-full max-w-3xl">
         <div class="p-6 border-b flex justify-between items-center"><h3 class="text-xl font-semibold">Gerenciar Cursos</h3><button id="close-cursos-modal" class="text-2xl">&times;</button></div>
         <div class="p-6">
             <form id="curso-form" class="flex items-end gap-4 mb-6">
@@ -180,6 +180,10 @@
                 <div class="w-40">
                     <label class="block text-sm font-medium mb-1">Validade (meses)</label>
                     <input type="number" id="curso-validade" min="0" class="form-input" placeholder="Ex: 12" required>
+                </div>
+                 <div class="w-48">
+                    <label class="block text-sm font-medium mb-1">Carga Horária (horas)</label>
+                    <input type="number" id="curso-carga-horaria" min="0" class="form-input" placeholder="Ex: 8" required>
                 </div>
                 <button type="submit" class="px-4 py-2 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600">Salvar</button>
                 <button type="button" id="cancel-edit-curso" class="px-4 py-2 bg-gray-200 rounded-lg hidden">Cancelar</button>
@@ -389,6 +393,7 @@
         const cursoForm = document.getElementById('curso-form');
         const cursoNomeInput = document.getElementById('curso-nome');
         const cursoValidadeInput = document.getElementById('curso-validade');
+        const cursoCargaHorariaInput = document.getElementById('curso-carga-horaria');
         const cursoIdInput = document.getElementById('curso-id');
         const cancelEditButton = document.getElementById('cancel-edit-curso');
         
@@ -435,10 +440,10 @@
                         <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border">
                             <div>
                                 <span class="text-gray-800 font-medium">${curso.nome}</span>
-                                <span class="text-gray-500 text-sm ml-2">(Validade: ${curso.validadeMeses} meses)</span>
+                                <span class="text-gray-500 text-sm ml-2">(Val: ${curso.validadeMeses}m, Carga: ${curso.cargaHoraria || 'N/A'}h)</span>
                             </div>
                             <div class="flex gap-3">
-                                <button onclick="window.editCurso('${curso.id}', '${curso.nome}', ${curso.validadeMeses})" class="text-blue-600"><ion-icon name="create-outline"></ion-icon></button>
+                                <button onclick="window.editCurso('${curso.id}', '${curso.nome}', ${curso.validadeMeses}, ${curso.cargaHoraria || 0})" class="text-blue-600"><ion-icon name="create-outline"></ion-icon></button>
                                 <button onclick="window.deleteCurso('${curso.id}')" class="text-red-600"><ion-icon name="trash-outline"></ion-icon></button>
                             </div>
                         </div>`;
@@ -450,11 +455,12 @@
             e.preventDefault();
             const cursoNome = cursoNomeInput.value.trim();
             const validade = parseInt(cursoValidadeInput.value);
+            const cargaHoraria = parseInt(cursoCargaHorariaInput.value);
             const cursoId = cursoIdInput.value;
-            if (!cursoNome || isNaN(validade)) return;
+            if (!cursoNome || isNaN(validade) || isNaN(cargaHoraria)) return;
 
             try {
-                const data = { nome: cursoNome, validadeMeses: validade };
+                const data = { nome: cursoNome, validadeMeses: validade, cargaHoraria };
                 if (cursoId) {
                     await updateDoc(doc(db, "cursos", cursoId), data);
                 } else {
@@ -467,10 +473,11 @@
             } catch (error) { console.error("Erro ao salvar curso:", error); }
         });
         
-        window.editCurso = (id, nome, validade) => {
+        window.editCurso = (id, nome, validade, cargaHoraria) => {
             cursoIdInput.value = id;
             cursoNomeInput.value = nome;
             cursoValidadeInput.value = validade;
+            cursoCargaHorariaInput.value = cargaHoraria;
             cursoNomeInput.focus();
             cancelEditButton.classList.remove('hidden');
         };
@@ -484,25 +491,21 @@
 
         async function seedDefaultCursos() {
             const defaultCursos = [
-                { nome: 'NR-05 - CIPA', validadeMeses: 12 },
-                { nome: 'NR-06 - Equipamento de Proteção Individual (EPI)', validadeMeses: 24 },
-                { nome: 'NR-10 - Segurança em Eletricidade (Básico)', validadeMeses: 24 },
-                { nome: 'NR-11 - Op. de Empilhadeira/Transporte', validadeMeses: 12 },
-                { nome: 'NR-12 - Segurança em Máquinas e Equipamentos', validadeMeses: 0 },
-                { nome: 'NR-18 - Construção Civil (Admissional)', validadeMeses: 0 },
-                { nome: 'NR-20 - Segurança com Inflamáveis', validadeMeses: 24 },
-                { nome: 'NR-33 - Espaços Confinados', validadeMeses: 12 },
-                { nome: 'NR-35 - Trabalho em Altura', validadeMeses: 24 },
-                { nome: 'Brigada de Incêndio', validadeMeses: 12 },
-                { nome: 'Primeiros Socorros (básico)', validadeMeses: 24 },
-                { nome: 'APH - Atendimento Pré-Hospitalar', validadeMeses: 24 }
+                { nome: 'NR-05 - CIPA', validadeMeses: 12, cargaHoraria: 20 },
+                { nome: 'NR-06 - Equipamento de Proteção Individual (EPI)', validadeMeses: 24, cargaHoraria: 2 },
+                { nome: 'NR-10 - Segurança em Eletricidade (Básico)', validadeMeses: 24, cargaHoraria: 40 },
+                { nome: 'NR-11 - Op. de Empilhadeira/Transporte', validadeMeses: 12, cargaHoraria: 16 },
+                { nome: 'NR-12 - Segurança em Máquinas e Equipamentos', validadeMeses: 0, cargaHoraria: 8 },
+                { nome: 'NR-18 - Construção Civil (Admissional)', validadeMeses: 0, cargaHoraria: 6 },
+                { nome: 'NR-20 - Segurança com Inflamáveis', validadeMeses: 24, cargaHoraria: 8 },
+                { nome: 'NR-33 - Espaços Confinados', validadeMeses: 12, cargaHoraria: 16 },
+                { nome: 'NR-35 - Trabalho em Altura', validadeMeses: 24, cargaHoraria: 8 },
+                { nome: 'Brigada de Incêndio', validadeMeses: 12, cargaHoraria: 8 },
+                { nome: 'Primeiros Socorros (básico)', validadeMeses: 24, cargaHoraria: 8 },
+                { nome: 'APH - Atendimento Pré-Hospitalar', validadeMeses: 24, cargaHoraria: 40 }
             ];
-
             const batch = writeBatch(db);
-            defaultCursos.forEach(curso => {
-                const docRef = doc(collection(db, "cursos"));
-                batch.set(docRef, curso);
-            });
+            defaultCursos.forEach(c => batch.set(doc(collection(db, "cursos")), c));
             await batch.commit();
         }
 
